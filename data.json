@@ -1,0 +1,1019 @@
+{
+  "version": 2,
+  "docs": [
+    {
+      "id": "doc1a0aa0f8d5a7cd31",
+      "name": "世界历史 九年级上册 时间线",
+      "created": "2026-09-16 19:52",
+      "title": "世界历史 九年级上册 时间线",
+      "globalOptions": {
+        "layout": "relative",
+        "pxPer100": 15,
+        "theme": "custom",
+        "customColors": {
+          "bg": "#f5efe0",
+          "timeBox": "#e8d9b8",
+          "timeBorder": "#8a6d3b",
+          "eventBox": "#fdf6e3",
+          "eventBorder": "#a8863f",
+          "detailBox": "#ffffff",
+          "detailBorder": "#cfc4a8",
+          "symPlace": "#cfe8ff",
+          "symPerson": "#ffe0c9",
+          "symDot": "#c0392b"
+        },
+        "show": {
+          "timeText": true,
+          "eventBox": true,
+          "eventText": true,
+          "detailBox": true,
+          "detailSymbol": true,
+          "detailText": true
+        }
+      },
+      "lanes": [
+        {
+          "id": "lane_overall",
+          "name": "总体文明",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_overall_1",
+              "timeText": "300万年前",
+              "startYear": -2998000,
+              "endYear": -2998000,
+              "eventText": "直立人形成",
+              "details": []
+            },
+            {
+              "id": "e_overall_2",
+              "timeText": "5万年前",
+              "startYear": -48000,
+              "endYear": -48000,
+              "eventText": "现代人形成",
+              "details": [
+                "_脑容量更大_"
+              ]
+            },
+            {
+              "id": "e_overall_3",
+              "timeText": "1万年前",
+              "startYear": -8000,
+              "endYear": -8000,
+              "eventText": "进入新石器时代",
+              "details": [
+                "_磨制石器_"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "lane_mesopotamia",
+          "name": "两河流域",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_meso_1",
+              "timeText": "1万年前",
+              "startYear": -8000,
+              "endYear": -8000,
+              "eventText": "上游农业、畜牧业出现",
+              "details": []
+            },
+            {
+              "id": "e_meso_2",
+              "timeText": "公元前3100年",
+              "startYear": -3100,
+              "endYear": -3100,
+              "eventText": "城市兴起",
+              "details": [
+                "【乌尔】",
+                "【乌鲁克】"
+              ]
+            },
+            {
+              "id": "e_meso_3",
+              "timeText": "公元前24世纪",
+              "startYear": -2399,
+              "endYear": -2300,
+              "eventText": "阿卡德王国统一",
+              "details": []
+            },
+            {
+              "id": "e_meso_4",
+              "timeText": "公元前18世纪",
+              "startYear": -1799,
+              "endYear": -1700,
+              "eventText": "古巴比伦统一",
+              "details": [
+                "（汉谟拉比）",
+                "_《汉谟拉比法典》_"
+              ]
+            },
+            {
+              "id": "e_meso_5",
+              "timeText": "公元前9世纪",
+              "startYear": -899,
+              "endYear": -800,
+              "eventText": "亚述帝国扩张",
+              "details": []
+            },
+            {
+              "id": "e_meso_6",
+              "timeText": "公元前7世纪",
+              "startYear": -699,
+              "endYear": -600,
+              "eventText": "巴比伦称霸西亚",
+              "details": []
+            },
+            {
+              "id": "e_meso_7",
+              "timeText": "公元前539年",
+              "startYear": -539,
+              "endYear": -539,
+              "eventText": "波斯帝国占领",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_egypt",
+          "name": "古埃及",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_egypt_1",
+              "timeText": "公元前3500年",
+              "startYear": -3500,
+              "endYear": -3500,
+              "eventText": "社会分化",
+              "details": []
+            },
+            {
+              "id": "e_egypt_2",
+              "timeText": "公元前3100年",
+              "startYear": -3100,
+              "endYear": -3100,
+              "eventText": "初步统一",
+              "details": []
+            },
+            {
+              "id": "e_egypt_3",
+              "timeText": "公元前15世纪",
+              "startYear": -1499,
+              "endYear": -1400,
+              "eventText": "达到鼎盛",
+              "details": [
+                "（图特摩斯三世）"
+              ]
+            },
+            {
+              "id": "e_egypt_4",
+              "timeText": "公元前525年",
+              "startYear": -525,
+              "endYear": -525,
+              "eventText": "波斯帝国吞并",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_india",
+          "name": "古印度",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_india_1",
+              "timeText": "公元前23世纪",
+              "startYear": -2299,
+              "endYear": -2200,
+              "eventText": "印度河文明出现",
+              "details": [
+                "【哈拉帕】",
+                "【摩亨佐·达罗】"
+              ]
+            },
+            {
+              "id": "e_india_2",
+              "timeText": "公元前18世纪",
+              "startYear": -1799,
+              "endYear": -1700,
+              "eventText": "印度河文明衰亡",
+              "details": []
+            },
+            {
+              "id": "e_india_3",
+              "timeText": "公元前1500年",
+              "startYear": -1500,
+              "endYear": -1500,
+              "eventText": "雅利安人进入",
+              "details": [
+                "（雅利安人）",
+                "_婆罗门_、_刹帝利_、_吠舍_、_首陀罗_"
+              ]
+            },
+            {
+              "id": "e_india_4",
+              "timeText": "公元前6世纪",
+              "startYear": -599,
+              "endYear": -500,
+              "eventText": "佛教产生",
+              "details": [
+                "（乔达摩·悉达多）",
+                "_众生平等_、_忍耐顺从_"
+              ]
+            },
+            {
+              "id": "e_india_5",
+              "timeText": "公元前后",
+              "startYear": 0,
+              "endYear": 0,
+              "eventText": "佛教传入中国",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_rome",
+          "name": "古罗马",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_rome_1",
+              "timeText": "公元前8世纪",
+              "startYear": -800,
+              "endYear": -701,
+              "eventText": "国家形成",
+              "details": [
+                "【意大利台伯河畔】",
+                "（罗慕路斯）"
+              ]
+            },
+            {
+              "id": "e_rome_2",
+              "timeText": "公元前509年",
+              "startYear": -509,
+              "endYear": -509,
+              "eventText": "罗马建立共和国",
+              "details": [
+                "_执政官_、_元老院_、_公民大会_、_保民官_",
+                "_《十二铜表法》_"
+              ]
+            },
+            {
+              "id": "e_rome_3",
+              "timeText": "公元前3世纪前期",
+              "startYear": -300,
+              "endYear": -251,
+              "eventText": "征服意大利半岛",
+              "details": []
+            },
+            {
+              "id": "e_rome_4",
+              "timeText": "公元前264—前146年",
+              "startYear": -264,
+              "endYear": -146,
+              "eventText": "布匿战争",
+              "details": [
+                "【地中海】",
+                "（汉尼拔）",
+                "_三次战争_"
+              ]
+            },
+            {
+              "id": "e_rome_5",
+              "timeText": "公元前1世纪后期",
+              "startYear": -100,
+              "endYear": -1,
+              "eventText": "罗马共和国演变为帝国",
+              "details": []
+            },
+            {
+              "id": "e_rome_6",
+              "timeText": "公元前49年",
+              "startYear": -49,
+              "endYear": -49,
+              "eventText": "凯撒独裁",
+              "details": [
+                "（凯撒）"
+              ]
+            },
+            {
+              "id": "e_rome_7",
+              "timeText": "公元前44年",
+              "startYear": -44,
+              "endYear": -44,
+              "eventText": "凯撒被刺杀",
+              "details": []
+            },
+            {
+              "id": "e_rome_8",
+              "timeText": "公元前27年",
+              "startYear": -27,
+              "endYear": -27,
+              "eventText": "屋大维元首制",
+              "details": [
+                "（屋大维）",
+                "_奥古斯都_"
+              ]
+            },
+            {
+              "id": "e_rome_9",
+              "timeText": "2世纪",
+              "startYear": 101,
+              "endYear": 200,
+              "eventText": "全盛时期",
+              "details": []
+            },
+            {
+              "id": "e_rome_10",
+              "timeText": "3世纪",
+              "startYear": 201,
+              "endYear": 300,
+              "eventText": "帝国危机",
+              "details": [
+                "_经济危机_",
+                "_人民起义_"
+              ]
+            },
+            {
+              "id": "e_rome_11",
+              "timeText": "392年",
+              "startYear": 392,
+              "endYear": 392,
+              "eventText": "基督教为国教",
+              "details": []
+            },
+            {
+              "id": "e_rome_12",
+              "timeText": "395年",
+              "startYear": 395,
+              "endYear": 395,
+              "eventText": "罗马帝国分裂",
+              "details": []
+            },
+            {
+              "id": "e_rome_13",
+              "timeText": "476年",
+              "startYear": 476,
+              "endYear": 476,
+              "eventText": "西罗马帝国灭亡",
+              "details": [
+                "【日耳曼】"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "lane_greece",
+          "name": "古希腊",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_greece_1",
+              "timeText": "约公元前2000年",
+              "startYear": -2000,
+              "endYear": -2000,
+              "eventText": "爱琴文明",
+              "details": [
+                "【克里特文明】",
+                "【迈锡尼文明】"
+              ]
+            },
+            {
+              "id": "e_greece_2",
+              "timeText": "公元前8—前6世纪",
+              "startYear": -800,
+              "endYear": -501,
+              "eventText": "城邦出现",
+              "details": [
+                "_小国寡民_"
+              ]
+            },
+            {
+              "id": "e_greece_3",
+              "timeText": "公元前5世纪中期",
+              "startYear": -450,
+              "endYear": -450,
+              "eventText": "政治改革，扩大公民权利",
+              "details": [
+                "（伯里克利）"
+              ]
+            },
+            {
+              "id": "e_greece_4",
+              "timeText": "公元前4世纪",
+              "startYear": -400,
+              "endYear": -301,
+              "eventText": "马其顿成为军事强国",
+              "details": [
+                "【希腊北部】"
+              ]
+            },
+            {
+              "id": "e_greece_5",
+              "timeText": "公元前334年",
+              "startYear": -334,
+              "endYear": -334,
+              "eventText": "进攻波斯帝国",
+              "details": [
+                "（亚历山大）"
+              ]
+            },
+            {
+              "id": "e_greece_6",
+              "timeText": "公元前330年",
+              "startYear": -330,
+              "endYear": -330,
+              "eventText": "灭亡波斯帝国",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_franks",
+          "name": "法兰克王国",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_franks_1",
+              "timeText": "481年",
+              "startYear": 481,
+              "endYear": 481,
+              "eventText": "法兰克王国建立",
+              "details": [
+                "（克洛维）",
+                "_皈依基督教_",
+                "_封赏土地_"
+              ]
+            },
+            {
+              "id": "e_franks_2",
+              "timeText": "768年",
+              "startYear": 768,
+              "endYear": 768,
+              "eventText": "查理成为国王",
+              "details": [
+                "_什一税_"
+              ]
+            },
+            {
+              "id": "e_franks_3",
+              "timeText": "800年",
+              "startYear": 800,
+              "endYear": 800,
+              "eventText": "查理加冕",
+              "details": [
+                "_罗马人的皇帝_",
+                "（查理曼）"
+              ]
+            },
+            {
+              "id": "e_franks_4",
+              "timeText": "814年",
+              "startYear": 814,
+              "endYear": 814,
+              "eventText": "查理曼去世",
+              "details": []
+            },
+            {
+              "id": "e_franks_5",
+              "timeText": "843年",
+              "startYear": 843,
+              "endYear": 843,
+              "eventText": "帝国一分为三",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_feudal",
+          "name": "西欧封建制度",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_feudal_1",
+              "timeText": "8世纪前期",
+              "startYear": 701,
+              "endYear": 750,
+              "eventText": "封君封臣制度",
+              "details": []
+            },
+            {
+              "id": "e_feudal_2",
+              "timeText": "9—11世纪",
+              "startYear": 801,
+              "endYear": 1100,
+              "eventText": "庄园和农奴制度",
+              "details": []
+            },
+            {
+              "id": "e_feudal_3",
+              "timeText": "11世纪开始",
+              "startYear": 1001,
+              "endYear": 1100,
+              "eventText": "开垦荒地、商品经济发展",
+              "details": [
+                "_垦荒_、_耕地增加_"
+              ]
+            },
+            {
+              "id": "e_feudal_4",
+              "timeText": "14世纪",
+              "startYear": 1301,
+              "endYear": 1400,
+              "eventText": "租地农场和手工工场",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_city_univ",
+          "name": "城市与大学",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_city_1",
+              "timeText": "10世纪",
+              "startYear": 901,
+              "endYear": 1000,
+              "eventText": "旧城市复苏，新城市兴起",
+              "details": [
+                "【琅城】",
+                "_金钱赎买_、_武力斗争_"
+              ]
+            },
+            {
+              "id": "e_city_2",
+              "timeText": "11世纪",
+              "startYear": 1001,
+              "endYear": 1100,
+              "eventText": "需求专业人才",
+              "details": []
+            },
+            {
+              "id": "e_city_3",
+              "timeText": "12世纪",
+              "startYear": 1101,
+              "endYear": 1200,
+              "eventText": "大学兴起",
+              "details": [
+                "【博洛尼亚大学】",
+                "【巴黎大学】"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "lane_byzantium",
+          "name": "拜占庭帝国（东罗马）",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_byz_1",
+              "timeText": "6世纪",
+              "startYear": 501,
+              "endYear": 600,
+              "eventText": "查士丁尼统治",
+              "details": [
+                "（查士丁尼）"
+              ]
+            },
+            {
+              "id": "e_byz_2",
+              "timeText": "528年",
+              "startYear": 528,
+              "endYear": 528,
+              "eventText": "组建法典编纂委员会",
+              "details": []
+            },
+            {
+              "id": "e_byz_3",
+              "timeText": "529年",
+              "startYear": 529,
+              "endYear": 529,
+              "eventText": "《查士丁尼法典》编纂完成",
+              "details": []
+            },
+            {
+              "id": "e_byz_4",
+              "timeText": "7世纪",
+              "startYear": 601,
+              "endYear": 700,
+              "eventText": "阿拉伯人进攻",
+              "details": [
+                "_行政改为军区_"
+              ]
+            },
+            {
+              "id": "e_byz_5",
+              "timeText": "9世纪以后",
+              "startYear": 801,
+              "endYear": 1200,
+              "eventText": "多外部进攻和十字军东征",
+              "details": []
+            },
+            {
+              "id": "e_byz_6",
+              "timeText": "14世纪初",
+              "startYear": 1301,
+              "endYear": 1330,
+              "eventText": "奥斯曼人进攻",
+              "details": []
+            },
+            {
+              "id": "e_byz_7",
+              "timeText": "1453年",
+              "startYear": 1453,
+              "endYear": 1453,
+              "eventText": "拜占庭帝国灭亡",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_japan",
+          "name": "日本",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_japan_1",
+              "timeText": "1—3世纪",
+              "startYear": 1,
+              "endYear": 300,
+              "eventText": "国家形成",
+              "details": [
+                "【九州】"
+              ]
+            },
+            {
+              "id": "e_japan_2",
+              "timeText": "5世纪",
+              "startYear": 401,
+              "endYear": 500,
+              "eventText": "大和政权统一",
+              "details": [
+                "【本州中部】"
+              ]
+            },
+            {
+              "id": "e_japan_3",
+              "timeText": "6世纪",
+              "startYear": 501,
+              "endYear": 600,
+              "eventText": "贵族竞争",
+              "details": []
+            },
+            {
+              "id": "e_japan_4",
+              "timeText": "646年",
+              "startYear": 646,
+              "endYear": 646,
+              "eventText": "大化改新",
+              "details": []
+            },
+            {
+              "id": "e_japan_5",
+              "timeText": "12世纪末",
+              "startYear": 1180,
+              "endYear": 1200,
+              "eventText": "幕府统治",
+              "details": [
+                "（源赖朝）",
+                "_征夷大将军_",
+                "【镰仓】"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "lane_arab",
+          "name": "阿拉伯帝国",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_arab_1",
+              "timeText": "6世纪末",
+              "startYear": 580,
+              "endYear": 600,
+              "eventText": "游牧生活",
+              "details": []
+            },
+            {
+              "id": "e_arab_2",
+              "timeText": "7世纪初",
+              "startYear": 601,
+              "endYear": 630,
+              "eventText": "伊斯兰教创立",
+              "details": [
+                "【麦加】",
+                "（穆罕默德）"
+              ]
+            },
+            {
+              "id": "e_arab_3",
+              "timeText": "622年",
+              "startYear": 622,
+              "endYear": 622,
+              "eventText": "国家雏形",
+              "details": [
+                "【麦地那】"
+              ]
+            },
+            {
+              "id": "e_arab_4",
+              "timeText": "630年",
+              "startYear": 630,
+              "endYear": 630,
+              "eventText": "占领麦加",
+              "details": []
+            },
+            {
+              "id": "e_arab_5",
+              "timeText": "8世纪中期",
+              "startYear": 701,
+              "endYear": 800,
+              "eventText": "全盛",
+              "details": [
+                "【大马士革】",
+                "【巴格达】",
+                "【开罗】"
+              ]
+            },
+            {
+              "id": "e_arab_6",
+              "timeText": "830年",
+              "startYear": 830,
+              "endYear": 830,
+              "eventText": "设立智慧宫",
+              "details": [
+                "（哈里发）",
+                "【巴格达】"
+              ]
+            },
+            {
+              "id": "e_arab_7",
+              "timeText": "9世纪中期",
+              "startYear": 850,
+              "endYear": 850,
+              "eventText": "内忧外患",
+              "details": []
+            },
+            {
+              "id": "e_arab_8",
+              "timeText": "1258年",
+              "startYear": 1258,
+              "endYear": 1258,
+              "eventText": "阿拉伯帝国灭亡",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_west_africa",
+          "name": "西非（加纳—马里—桑海）",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_wa_1",
+              "timeText": "8世纪末",
+              "startYear": 780,
+              "endYear": 800,
+              "eventText": "加纳建立",
+              "details": [
+                "【尼日尔河—塞内加尔河上游】"
+              ]
+            },
+            {
+              "id": "e_wa_2",
+              "timeText": "14世纪",
+              "startYear": 1301,
+              "endYear": 1400,
+              "eventText": "马里成为帝国",
+              "details": []
+            },
+            {
+              "id": "e_wa_3",
+              "timeText": "1324年",
+              "startYear": 1324,
+              "endYear": 1324,
+              "eventText": "国王前往麦加",
+              "details": [
+                "（曼萨·穆萨）"
+              ]
+            },
+            {
+              "id": "e_wa_4",
+              "timeText": "14世纪末",
+              "startYear": 1370,
+              "endYear": 1400,
+              "eventText": "马里衰微，桑海兴起",
+              "details": []
+            },
+            {
+              "id": "e_wa_5",
+              "timeText": "15世纪中后期",
+              "startYear": 1450,
+              "endYear": 1500,
+              "eventText": "桑海形成帝国",
+              "details": [
+                "（穆罕默德一世）"
+              ]
+            },
+            {
+              "id": "e_wa_6",
+              "timeText": "16世纪末",
+              "startYear": 1570,
+              "endYear": 1600,
+              "eventText": "桑海衰亡",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_maya",
+          "name": "玛雅",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_maya_1",
+              "timeText": "公元前11世纪",
+              "startYear": -1100,
+              "endYear": -1001,
+              "eventText": "从事农业",
+              "details": []
+            },
+            {
+              "id": "e_maya_2",
+              "timeText": "公元前后",
+              "startYear": 0,
+              "endYear": 0,
+              "eventText": "建立城市国家",
+              "details": [
+                "【尤卡坦半岛南端】"
+              ]
+            },
+            {
+              "id": "e_maya_3",
+              "timeText": "3世纪起",
+              "startYear": 201,
+              "endYear": 300,
+              "eventText": "繁荣",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_aztec",
+          "name": "阿兹特克",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_aztec_1",
+              "timeText": "14世纪",
+              "startYear": 1301,
+              "endYear": 1400,
+              "eventText": "兴起",
+              "details": [
+                "【墨西哥】"
+              ]
+            },
+            {
+              "id": "e_aztec_2",
+              "timeText": "16世纪初",
+              "startYear": 1501,
+              "endYear": 1520,
+              "eventText": "鼎盛",
+              "details": [
+                "【都城特诺奇蒂特兰】"
+              ]
+            },
+            {
+              "id": "e_aztec_3",
+              "timeText": "16世纪前期",
+              "startYear": 1501,
+              "endYear": 1550,
+              "eventText": "被摧毁",
+              "details": []
+            }
+          ]
+        },
+        {
+          "id": "lane_inca",
+          "name": "印加",
+          "visible": true,
+          "color": null,
+          "events": [
+            {
+              "id": "e_inca_1",
+              "timeText": "12世纪",
+              "startYear": 1101,
+              "endYear": 1200,
+              "eventText": "定居并建国",
+              "details": [
+                "【库斯科】"
+              ]
+            },
+            {
+              "id": "e_inca_2",
+              "timeText": "15世纪末16世纪初",
+              "startYear": 1450,
+              "endYear": 1550,
+              "eventText": "进入帝国，极盛",
+              "details": [
+                "_灌溉农业_、_梯田系统_"
+              ]
+            },
+            {
+              "id": "e_inca_3",
+              "timeText": "16世纪前期",
+              "startYear": 1501,
+              "endYear": 1550,
+              "eventText": "被摧毁",
+              "details": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "umu461fb524923",
+      "name": "九上 国家专题",
+      "created": "2026-09-16 21:58",
+      "title": "世界历史 时间线",
+      "globalOptions": {
+        "layout": "scale",
+        "pxPer100": 30,
+        "theme": "parchment",
+        "customColors": {
+          "bg": "#f5efe0",
+          "timeBox": "#e8d9b8",
+          "timeBorder": "#8a6d3b",
+          "eventBox": "#fdf6e3",
+          "eventBorder": "#a8863f",
+          "detailBox": "#ffffff",
+          "detailBorder": "#cfc4a8",
+          "symPlace": "#cfe8ff",
+          "symPerson": "#ffe0c9",
+          "symDot": "#c0392b"
+        },
+        "show": {
+          "timeText": true,
+          "eventBox": true,
+          "eventText": true,
+          "detailBox": true,
+          "detailSymbol": true,
+          "detailText": true
+        }
+      },
+      "lanes": []
+    },
+    {
+      "id": "umu5kty1f32705",
+      "name": "新时间轴",
+      "created": "2026-09-17 21:40",
+      "title": "世界历史 时间线",
+      "globalOptions": {
+        "layout": "scale",
+        "pxPer100": 30,
+        "theme": "parchment",
+        "customColors": {
+          "bg": "#f5efe0",
+          "timeBox": "#e8d9b8",
+          "timeBorder": "#8a6d3b",
+          "eventBox": "#fdf6e3",
+          "eventBorder": "#a8863f",
+          "detailBox": "#ffffff",
+          "detailBorder": "#cfc4a8",
+          "symPlace": "#cfe8ff",
+          "symPerson": "#ffe0c9",
+          "symDot": "#c0392b"
+        },
+        "show": {
+          "timeText": true,
+          "eventBox": true,
+          "eventText": true,
+          "detailBox": true,
+          "detailSymbol": true,
+          "detailText": true
+        }
+      },
+      "lanes": []
+    }
+  ]
+}
