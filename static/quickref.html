@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>速查 · 历史学习</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%F0%9F%94%8D%3C/text%3E%3C/svg%3E">
+<style>
+/* ════════════ 速查页主题变量（复用时间轴全套主题，全局统一 4 套配色） ════════════ */
+:root{
+  --bg:#f5efe0; --panel:#fffdf6; --panel-border:#cbbf9e; --text:#3a3228; --muted:#8a7f6c;
+  --time-box:#e8d9b8; --time-border:#8a6d3b; --time-text:#3a2c14;
+  --event-box:#fdf6e3; --event-border:#a8863f; --event-text:#5a4a2e;
+  --detail-box:#fff; --detail-border:#cfc4a8; --detail-text:#555; --arrow:#8a6d3b;
+  --sym-place-bg:#cfe8ff; --sym-place-text:#17517e;
+  --sym-person-bg:#ffe0c9; --sym-person-text:#8a3d12; --sym-dot-color:#c0392b;
+  --qr-star:#e6a817; --qr-star-off:#d9cbaa; --qr-red:#c0392b; --qr-soft:#eee4cd;
+  --qr-ans-bg:#fdf6e3; --qr-accent:#4c7fb0; --qr-ehead:#f2e8cd;
+}
+body.theme-ocean{--bg:#ddeef7;--panel:#f4fbfe;--panel-border:#9ec3d6;--text:#1f3a4d;--muted:#76a0b8;
+  --time-box:#bfe0f0;--time-border:#3d7ea6;--time-text:#123646;--event-box:#eaf6fd;--event-border:#5b98ba;--event-text:#2c5b77;
+  --detail-box:#fff;--detail-border:#b6d5e5;--detail-text:#4a6580;--arrow:#3d7ea6;
+  --sym-place-bg:#cfe8ff;--sym-place-text:#17517e;--sym-person-bg:#ffdcd1;--sym-person-text:#8a3418;--sym-dot-color:#c0392b;
+  --qr-star:#e6a817;--qr-star-off:#b8cbd8;--qr-red:#c0392b;--qr-soft:#dcebf4;--qr-ans-bg:#eaf6fd;--qr-accent:#2b6cb0;--qr-ehead:#d8e9f5;}
+body.theme-forest{--bg:#e4f0e3;--panel:#f6fbf5;--panel-border:#9fc49a;--text:#23402a;--muted:#7fa37c;
+  --time-box:#cfe6c9;--time-border:#4f7f4a;--time-text:#1f3b24;--event-box:#eef7ec;--event-border:#6f9c69;--event-text:#2f5632;
+  --detail-box:#fff;--detail-border:#bcd6b7;--detail-text:#3f5f45;--arrow:#4f7f4a;
+  --sym-place-bg:#d5ecff;--sym-place-text:#1b587f;--sym-person-bg:#ffe3cc;--sym-person-text:#8a3d12;--sym-dot-color:#a0522d;
+  --qr-star:#e6a817;--qr-star-off:#b8ccb4;--qr-red:#c0392b;--qr-soft:#dcead9;--qr-ans-bg:#eef7ec;--qr-accent:#2f7d4f;--qr-ehead:#d9e8d6;}
+body.theme-mono{--bg:#fff;--panel:#fff;--panel-border:#333;--text:#000;--muted:#444;
+  --time-box:#fff;--time-border:#000;--time-text:#000;--event-box:#fff;--event-border:#000;--event-text:#000;
+  --detail-box:#fff;--detail-border:#666;--detail-text:#000;--arrow:#000;
+  --sym-place-bg:#fff;--sym-place-text:#000;--sym-person-bg:#fff;--sym-person-text:#000;--sym-dot-color:#000;
+  --qr-star:#000;--qr-star-off:#999;--qr-red:#000;--qr-soft:#eee;--qr-ans-bg:#fff;--qr-accent:#000;--qr-ehead:#eee;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;padding-left:64px;}
+#topbar{position:sticky;top:0;z-index:60;background:var(--panel);border-bottom:2px solid var(--panel-border);box-shadow:0 2px 6px rgba(0,0,0,.06);}
+#ctrlRow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:9px 12px;border-top:1px solid var(--panel-border);}
+#ctrlRow button,#ctrlRow select,#ctrlRow label.chip{font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);color:var(--text);cursor:pointer;user-select:none;}
+#ctrlRow button:hover{filter:brightness(.96);}
+#ctrlRow .sep{width:1px;height:22px;background:var(--panel-border);align-self:center;}
+#ctrlRow .grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ctl-label{font-size:12px;color:var(--muted);white-space:nowrap;}
+.radiogroup{display:inline-flex;gap:4px;}
+.radiogroup button{font-size:13px;padding:5px 10px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);color:var(--text);cursor:pointer;}
+.radiogroup button.active{background:var(--qr-accent);color:#fff;border-color:var(--qr-accent);}
+label.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;cursor:pointer;}
+label.chip input{accent-color:var(--qr-accent);cursor:pointer;}
+label.chip.off{opacity:.45;}
+.doc-chip{max-width:150px;}
+#srcDocs{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px 2px;border-bottom:1px dashed var(--panel-border);}
+#srcDocs .ctl-label{font-weight:600;}
+#qrHint{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap;}
+#main{max-width:920px;margin:14px auto;padding:0 12px 40px;}
+
+/* 事件框（与时间轴一致的完整卡片样式） */
+.unit{min-width:118px;display:flex;flex-direction:column;margin:6px 0;}
+.unit .time-box{height:34px;border-radius:10px;background:var(--time-box);border:2px solid var(--time-border);display:flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;}
+.time-text{font-size:14px;font-weight:700;color:var(--time-text);letter-spacing:1px;}
+.unit .event-box{margin:5px 0;padding:5px 8px;border-radius:9px;background:var(--event-box);border:2px solid var(--event-border);}
+.event-text{font-size:13px;color:var(--event-text);line-height:1.5;word-wrap:break-word;}
+.unit .detail-box{padding:6px 9px;border-radius:9px;background:var(--detail-box);border:1.5px dashed var(--detail-border);}
+.detail-line{font-size:12.5px;line-height:1.95;color:var(--detail-text);word-wrap:break-word;}
+.place{background:var(--sym-place-bg);color:var(--sym-place-text);border-radius:4px;padding:0 3px;font-weight:600;}
+.person{background:var(--sym-person-bg);color:var(--sym-person-text);border-radius:4px;padding:0 3px;font-weight:600;}
+.mk-sym{opacity:.6;font-weight:700;}
+.dot{color:var(--sym-dot-color);text-decoration:underline;text-decoration-color:var(--sym-dot-color);text-decoration-thickness:2px;font-weight:600;}
+
+/* 实体卡片（信息一览） */
+.qr-entity{background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden;}
+.qr-ehead{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--qr-ehead);}
+.qr-type{flex:none;font-size:11px;color:var(--muted);border:1px solid var(--panel-border);border-radius:5px;padding:1px 6px;}
+.qr-name{flex:1;font-size:16px;font-weight:700;line-height:1.4;word-break:break-all;}
+.qr-count{flex:none;font-size:12px;color:var(--muted);white-space:nowrap;}
+.star-btn{flex:none;width:30px;height:30px;border:none;background:none;font-size:22px;line-height:1;cursor:pointer;color:var(--qr-star-off);}
+.star-btn:hover{color:var(--qr-star);}
+.star-btn.on{color:var(--qr-star);}
+.qr-toggle{padding:6px 14px;font-size:13px;border:1px solid var(--qr-accent);border-radius:6px;background:var(--panel);color:var(--qr-accent);cursor:pointer;flex:none;}
+.qr-toggle:hover{filter:brightness(.96);}
+.qr-toggle.showing{background:var(--qr-accent);color:#fff;}
+.qr-events{display:none;padding:4px 16px 14px;border-top:1px dashed var(--panel-border);}
+.qr-events.show{display:block;}
+
+/* 主动学习 */
+.qr-active-card{background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden;}
+.qr-ac-head{display:flex;align-items:center;gap:10px;padding:14px;background:var(--qr-ehead);flex-wrap:wrap;}
+.qr-ac-name{flex:1;font-size:18px;font-weight:700;word-break:break-all;}
+.qr-ac-body{display:none;padding:6px 16px 16px;border-top:1px dashed var(--panel-border);}
+.qr-ac-body.show{display:block;}
+.qr-ac-nav{display:flex;align-items:center;justify-content:center;gap:12px;margin:14px 0;flex-wrap:wrap;}
+.qr-ac-nav button{padding:7px 16px;font-size:13px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);cursor:pointer;}
+.qr-ac-nav button:disabled{opacity:.4;cursor:default;}
+.qr-ac-nav .pg-info{font-size:13px;color:var(--muted);}
+#revealBtn{padding:10px 22px;font-size:15px;border:1px solid var(--qr-accent);border-radius:8px;background:var(--panel);color:var(--qr-accent);cursor:pointer;}
+#revealBtn:hover{filter:brightness(.96);}
+#revealBtn.showing{background:var(--qr-accent);color:#fff;}
+
+/* 分页 */
+#pager{display:flex;align-items:center;justify-content:center;gap:10px;margin:20px 0;flex-wrap:wrap;}
+#pager button{padding:6px 14px;font-size:13px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);cursor:pointer;}
+#pager button:disabled{opacity:.4;cursor:default;}
+#pager select{font-size:13px;padding:5px 8px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);cursor:pointer;}
+.pg-info{font-size:13px;color:var(--muted);}
+.empty-tip{text-align:center;color:var(--muted);padding:60px 0;font-size:14px;line-height:2;}
+
+/* 弹窗 */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,15,15,.5);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-backdrop.open{display:flex;}
+.modal{width:640px;max-width:94vw;max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.modal h3{margin-bottom:12px;font-size:16px;border-bottom:2px solid var(--panel-border);padding-bottom:8px;}
+.form-row{margin-bottom:10px;}
+.form-row label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+.form-row input[type=text],.form-row textarea{width:100%;padding:7px 9px;font-size:13px;font-family:inherit;border:1px solid var(--panel-border);border-radius:6px;color:var(--text);background:var(--panel);}
+.form-row textarea{resize:vertical;min-height:110px;font-family:Consolas,"Courier New",monospace;font-size:12px;line-height:1.6;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;align-items:center;}
+.modal-actions button{padding:7px 14px;font-size:13px;border-radius:6px;border:1px solid var(--panel-border);cursor:pointer;background:var(--panel);}
+.modal-actions .primary{background:var(--qr-accent);color:#fff;border-color:var(--qr-accent);}
+.modal-actions .danger{background:var(--qr-red);color:#fff;border-color:var(--qr-red);}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.7;word-break:break-all;}
+.wl-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--panel-border);border-radius:8px;margin:6px 0;flex-wrap:wrap;}
+.wl-row .wl-name{flex:1;min-width:120px;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wl-row .wl-count{font-size:12px;color:var(--muted);}
+.wl-row button{font-size:12px;padding:4px 9px;border:1px solid var(--panel-border);border-radius:5px;background:var(--panel);cursor:pointer;}
+.wl-row .wl-cur{border-color:var(--qr-star);color:var(--qr-star);font-weight:600;}
+.wl-row .wl-del{color:var(--qr-red);border-color:var(--qr-red);}
+
+/* 配色下拉 */
+.th-dropdown{display:none;position:fixed;top:96px;right:14px;min-width:250px;background:var(--panel);
+  border:1px solid var(--panel-border);border-radius:8px;padding:12px;box-shadow:0 8px 22px rgba(0,0,0,.16);z-index:120;}
+.th-dropdown.open{display:block;}
+.th-dropdown h4{margin:0 0 8px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--panel-border);padding-bottom:6px;}
+.th-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.th-item{border:2px solid var(--panel-border);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px;}
+.th-item.active{border-color:var(--qr-accent);}
+.th-swatch{width:26px;height:18px;border:1px solid #999;border-radius:3px;flex:none;}
+
+#errBox{position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:var(--qr-red);color:#fff;padding:10px 12px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;box-shadow:0 2px 8px rgba(0,0,0,.4);display:none;}
+@media (max-width:720px){body{padding-left:56px;}.doc-chip{max-width:110px;}}
+/* 打印：只显示打印区（排版为信息一览），随当前展开/收起状态，尽量不分页 */
+#printArea{display:none;}
+@media print{
+  #topbar,#pager,#thBox,.star-btn,.modal-backdrop{display:none!important;}
+  .sb-sidebar{display:none!important;}
+  body{padding-left:0!important;background:#fff!important;}
+  #main{display:none!important;}
+  #printArea{display:block!important;}
+  .qr-entity,.unit, .qr-events.show, .detail-box{break-inside:avoid;break-after:auto;}
+}
+</style>
+<style>
+/* ════════════ 侧边栏（类名统一加 sb- 前缀，避免与页面样式冲突导致白屏） ════════════ */
+:root{--sb-w:64px;--sb-w-open:220px;--sb-bg:#8a6d3b;}
+body.theme-ocean{--sb-bg:#2b6cb0;}
+body.theme-forest{--sb-bg:#2f7d4f;}
+body.theme-mono{--sb-bg:#000;}
+.sb-sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:var(--sb-bg);padding:16px 0;overflow:hidden;overflow-x:hidden;z-index:1000;box-shadow:1px 0 0 rgba(0,0,0,.06);user-select:none;-webkit-tap-highlight-color:transparent;transition:width .26s cubic-bezier(.4,0,.2,1);}
+.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w-open);}
+.sb-item{display:flex;align-items:center;height:56px;margin:2px 8px;padding:0 12px;border-radius:8px;color:#fff;text-decoration:none;white-space:nowrap;transition:background .18s ease;}
+.sb-item:hover,.sb-item:focus-visible{background:rgba(255,255,255,.14);outline:none;}
+.sb-item.sb-active{background:rgba(255,255,255,.24);}
+.sb-ico{flex:0 0 24px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+.sb-ico svg{width:24px;height:24px;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sb-txt{margin-left:16px;font-size:16px;line-height:1;opacity:0;transform:translateX(-6px);transition:opacity .18s ease,transform .18s ease;}
+.sb-sidebar:hover .sb-txt,.sb-sidebar:focus-within .sb-txt{opacity:1;transform:translateX(0);}
+.sb-sidebar:hover .sb-item .sb-txt{transition-delay:.06s;}
+body{padding-left:var(--sb-w);}
+@media (hover:none) and (min-width:721px){.sb-sidebar{width:var(--sb-w-open);}.sb-txt{opacity:1;transform:none;}}
+@media (max-width:720px){:root{--sb-w:56px;--sb-w-open:56px;}.sb-txt{display:none;}.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w);}}
+@media print{.sb-sidebar{display:none!important;}body{padding-left:0!important;}}
+</style>
+</head>
+<body class="theme-parchment">
+<!-- ════════════ 侧边栏导航 ════════════ -->
+<aside class="sb-sidebar" aria-label="主导航">
+  <nav>
+    <a class="sb-item" href="/" title="主页"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M3.5 10.4 12 3.6l8.5 6.8"/><path d="M5.8 9.6V20h12.4V9.6"/><path d="M9.9 20v-5.2h4.2V20"/></svg></span><span class="sb-txt">主页</span></a>
+    <a class="sb-item" href="/timeline.html" title="时间轴"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12"/><path d="M12 12l3.6 2.4"/></svg></span><span class="sb-txt">时间轴</span></a>
+    <a class="sb-item" href="/qa.html" title="问答练习"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M9 18.2 4.2 20.4l1.1-4.3A6.9 6.9 0 1 1 9 18.2Z"/><path d="M12 8.2v1.3"/><path d="M12 12.4h.01"/></svg></span><span class="sb-txt">问答练习</span></a>
+    <a class="sb-item" href="/quickref.html" title="速查"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="10.6" cy="10.6" r="6.4"/><path d="M15.4 15.4 20 20"/><path d="M8 10.6h5.2"/></svg></span><span class="sb-txt">速查</span></a>
+    <a class="sb-item" href="/settings.html" title="设置"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06A2 2 0 1 1 7.03 4.24l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.26.58.84.93 1.51 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg></span><span class="sb-txt">设置</span></a>
+  </nav>
+</aside>
+<script>
+(function(){var p=(location.pathname.split("/").pop()||"index.html");document.querySelectorAll(".sb-item").forEach(function(a){var h=(a.getAttribute("href")||"").split("/").pop();if(h===p)a.classList.add("sb-active");});})();
+</script>
+<!-- ════════════ /侧边栏 ════════════ -->
+
+<div id="topbar">
+  <div id="srcDocs"></div>
+  <div id="ctrlRow">
+    <span class="ctl-label">逆向维度：</span>
+    <div class="radiogroup" id="typeRg">
+      <button class="active" data-t="person">👤 人物</button>
+      <button data-t="place">📍 地点</button>
+    </div>
+    <span class="sep"></span>
+    <span class="ctl-label">模式：</span>
+    <div class="radiogroup" id="modeRg">
+      <button class="active" data-m="overview">📋 信息一览</button>
+      <button data-m="active">🎯 主动学习</button>
+    </div>
+    <div id="orderBox" style="display:none" class="grp">
+      <span class="ctl-label">抽选：</span>
+      <div class="radiogroup" id="orderRg">
+        <button class="active" data-o="seq">顺序</button>
+        <button data-o="random">随机</button>
+      </div>
+      <button id="reshuffle" style="display:none" title="重新随机打乱">🔀 重抽</button>
+    </div>
+    <span class="sep"></span>
+    <button id="showAllBtn" title="展示当前视图内所有实体的全部事件">✅ 全部展示事件</button>
+    <button id="hideAllBtn" title="全部隐藏事件">🙈 全部收起</button>
+    <span class="sep"></span>
+    <select id="weakSel" title="选择薄弱点列表后，只查看该列表内的人物/地点"></select>
+    <button id="weakBtn">⭐ 薄弱点</button>
+    <span class="sep"></span>
+    <button id="printBtn" style="background:#2e6b45;color:#fff;border-color:#2e6b45;">🖨 打印PDF</button>
+    <button id="offlineBtn" title="下载包含当前来源数据的离线速查页" style="background:#8a5a3b;color:#fff;border-color:#8a5a3b;">💾 保存离线</button>
+    <button id="thBtn">🎨 配色</button>
+    <span id="qrHint"></span>
+  </div>
+</div>
+
+<!-- 配色下拉 -->
+<div id="thBox" class="th-dropdown">
+  <h4>配色方案（全局统一）</h4>
+  <div class="th-grid">
+    <div class="th-item active" data-t="parchment" onclick="pickTheme('parchment')"><span class="th-swatch" style="background:#f5efe0"></span>羊皮纸</div>
+    <div class="th-item" data-t="ocean" onclick="pickTheme('ocean')"><span class="th-swatch" style="background:#ddeef7"></span>海洋蓝</div>
+    <div class="th-item" data-t="forest" onclick="pickTheme('forest')"><span class="th-swatch" style="background:#e4f0e3"></span>自然绿</div>
+    <div class="th-item" data-t="mono" onclick="pickTheme('mono')"><span class="th-swatch" style="background:#fff"></span>打印黑白</div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="listArea">
+    <div id="entList"></div>
+    <div id="pager"></div>
+  </div>
+</div>
+
+<!-- 打印区：打印时按“信息一览”排版，展示当前筛选的全部实体（随当前展开/收起状态） -->
+<div id="printArea"></div>
+
+<!-- 薄弱点管理弹窗 -->
+<div id="weakModal" class="modal-backdrop">
+  <div class="modal">
+    <h3>⭐ 薄弱点管理</h3>
+    <p class="hint">点击实体上的 ★ 即可把该「人物/地点」加入当前列表。列表保存在服务器后端（quickref_data.json）；可新建（命名）、设为当前、重命名、删除，也可导出/导入 JSON 以便备份或换设备后恢复。</p>
+    <div class="form-row" style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="newWlName" placeholder="新列表名称，如：易混人物" style="flex:1">
+      <button class="primary" onclick="createWeakList()">＋ 新建列表</button>
+    </div>
+    <div id="wlList"></div>
+    <div id="wlImportBox" style="display:none;margin-top:8px;">
+      <div class="form-row">
+        <label>粘贴薄弱点 JSON（来自之前的导出）：</label>
+        <textarea id="wlImportTxt" placeholder='{"weakLists":[{"name":"我的薄弱点","entityKeys":["p:居鲁士","l:两河流域"]}]}'></textarea>
+      </div>
+      <div class="modal-actions"><button class="primary" onclick="doImportWeakLists()">导入</button></div>
+    </div>
+    <div class="modal-actions">
+      <button onclick="exportWeakLists()">⬇ 导出薄弱点JSON</button>
+      <button onclick="toggleWlImportBox()">⬆ 导入薄弱点JSON</button>
+      <span style="flex:1"></span>
+      <button onclick="closeMod('weakModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div id="errBox"></div>
+
+<script>
+"use strict";
+/* ════════════ 模式与全局错误捕获 ════════════ */
+window.G_OFFLINE = window.__OFFLINE_DATA !== undefined;
+window.G_READONLY = (location.port === "8424") || window.G_OFFLINE;
+window.addEventListener('error', function (evt) {
+  try {
+    var msg = (evt && (evt.message || (evt.error && evt.error.message))) || '';
+    var ln = (evt && evt.lineno) ? (' @' + evt.lineno) : '';
+    var box = document.getElementById('errBox');
+    if (box) { box.textContent = '页面脚本错误: ' + msg + ln; box.style.display = 'block'; }
+    try { document.title = '页面脚本错误: ' + msg + ln; } catch (_t) {}
+  } catch (_e) {}
+});
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = p => (p || "x") + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const now = () => { const d = new Date(); const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()); };
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ════════════ 数据 ════════════ */
+let tld = { version: 2, docs: [] };     // 时间轴数据（只读来源）
+let qr = { version: 1, weakLists: [] }; // 速查薄弱点数据
+let selectedDocs = new Set();           // 选中的来源文档 id
+let targetType = "person";              // "person" | "place"
+let mode = "overview";                  // "overview" | "active"
+let orderMode = "seq";                  // "seq" | "random"
+let entities = [];                      // [{key,name,type,events:[],idx}]
+let activeListId = null;                // 当前薄弱点列表
+let page = 0, pageSize = 30;
+const revealed = new Set();             // 已展开事件的实体 key（信息一览）
+let activeIdx = 0;                      // 主动学习当前位置（在过滤后的顺序列表内）
+let activeRevealed = false;             // 主动学习当前实体是否展示事件
+let randomOrder = [];                   // 主动学习随机顺序（指针数组，指向 filtered 下标）
+const THEME_ALT={"parchment":"theme-parchment","ocean":"theme-ocean","forest":"theme-forest","mono":"theme-mono"};
+let G_THEME="parchment";
+
+/* ════════════ 实体提取（从选中的时间轴文档解析 【地点】 与 （人名）） ════════════ */
+function keyOf(type, name){ return (type === "person" ? "p:" : "l:") + name; }
+function nameOfKey(k){ return k.indexOf(":") > -1 ? k.slice(k.indexOf(":") + 1) : k; }
+function extract(){
+  const map = new Map(); let order = 0;
+  (tld.docs || []).forEach(doc => {
+    if (!selectedDocs.has(doc.id)) return;
+    const docName = doc.name || "";
+    (doc.lanes || []).forEach(lane => {
+      const laneName = lane.name || "";
+      (lane.events || []).forEach(ev => {
+        const found = new Map(); // key -> true（本事件去重）
+        (ev.details || []).forEach(d => {
+          const s = String(d); const re = /【[^】]*】|（[^）]*）/g; let m;
+          while ((m = re.exec(s))) {
+            if (m[0][0] === "【") { if (targetType === "place") { const n = m[0].slice(1, -1); if (n.trim()) found.set(keyOf("place", n.trim()), n.trim()); } }
+            else { if (targetType === "person") { const n = m[0].slice(1, -1); if (n.trim()) found.set(keyOf("person", n.trim()), n.trim()); } }
+          }
+        });
+        found.forEach((name, key) => {
+          let ent = map.get(key);
+          if (!ent) { ent = { key, name, type: targetType, events: [], idx: order++ }; map.set(key, ent); }
+          ent.events.push({ docId: doc.id, docName, laneName, ev });
+        });
+      });
+    });
+  });
+  entities = [...map.values()].sort((a, b) => a.idx - b.idx);
+}
+
+/* 当前视图的实体列表（按薄弱点列表过滤；若选定列表只显示其中实体） */
+function currentEntities(){
+  const list = activeListId ? qr.weakLists.find(w => w.id === activeListId) : null;
+  if (!list) return entities;
+  const set = new Set(list.entityKeys || []);
+  return entities.filter(e => set.has(e.key));
+}
+
+/* ════════════ 事件单元渲染（与时间轴一致：时间框 + 事件框 + 详情框） ════════════ */
+function renderDetailLine(line, showSym, showTxt){
+  const box = document.createElement("div"); box.className = "detail-line";
+  if (!showTxt && !showSym) return box;
+  const re = /【[^】]*】|（[^）]*）|_[^_]*_/g; let last = 0, m; const segs = [];
+  while ((m = re.exec(line))) { if (m.index > last) segs.push({ t: "txt", v: line.slice(last, m.index) }); segs.push({ t: m[0][0], v: m[0] }); last = re.lastIndex; }
+  if (last < line.length) segs.push({ t: "txt", v: line.slice(last) });
+  for (const s of segs) {
+    if (s.t === "txt") { if (showTxt) box.appendChild(document.createTextNode(s.v)); }
+    else if (s.t === "【") renderMark(box, s.v.slice(1, -1), "place", showSym, showTxt);
+    else if (s.t === "（") renderMark(box, s.v.slice(1, -1), "person", showSym, showTxt);
+    else { const sp = document.createElement("span"); sp.className = "dot"; const u = document.createElement("u"); u.textContent = showTxt ? s.v.slice(1, -1) : ""; sp.appendChild(u); box.appendChild(sp); }
+  }
+  return box;
+}
+function renderMark(box, v, cls, showSym, showTxt){
+  const L = cls === "place" ? "【" : "（", R = cls === "place" ? "】" : "）";
+  const sp = document.createElement("span"); sp.className = cls;
+  if (showSym) { const s = document.createElement("span"); s.className = "mk-sym"; s.textContent = L; sp.appendChild(s); }
+  if (showTxt) { const u = document.createElement("u"); u.textContent = v; sp.appendChild(u); }
+  if (showSym) { const s = document.createElement("span"); s.className = "mk-sym"; s.textContent = R; sp.appendChild(s); }
+  box.appendChild(sp);
+}
+function buildEventUnit(ev){
+  const unit = document.createElement("div"); unit.className = "unit";
+  const tb = document.createElement("div"); tb.className = "time-box";
+  if (ev.timeText) { const t = document.createElement("span"); t.className = "time-text"; t.textContent = ev.timeText; tb.appendChild(t); }
+  unit.appendChild(tb);
+  if (ev.eventText) { const eb = document.createElement("div"); eb.className = "event-box"; const et = document.createElement("span"); et.className = "event-text"; et.textContent = ev.eventText; eb.appendChild(et); unit.appendChild(eb); }
+  if (Array.isArray(ev.details) && ev.details.length) {
+    const db = document.createElement("div"); db.className = "detail-box";
+    ev.details.forEach(d => { if (d == null || d === "") return; db.appendChild(renderDetailLine(String(d), true, true)); });
+    unit.appendChild(db);
+  }
+  return unit;
+}
+
+/* ════════════ 来源文档标签 ════════════ */
+function renderSrcDocs(){
+  const box = $("srcDocs"); box.innerHTML = "";
+  const label = document.createElement("span"); label.className = "ctl-label"; label.textContent = "数据来源（可选多个时间轴）："; box.appendChild(label);
+  const all = document.createElement("label"); all.className = "chip";
+  all.innerHTML = '<input type="checkbox" id="chkAll" checked>全选';
+  all.querySelector("input").checked = selectedDocs.size === (tld.docs || []).length;
+  all.querySelector("input").onchange = () => {
+    const on = all.querySelector("input").checked;
+    (tld.docs || []).forEach(d => { if (on) selectedDocs.add(d.id); else selectedDocs.delete(d.id); });
+    renderSrcDocs(); onPickChange();
+  };
+  box.appendChild(all);
+  (tld.docs || []).forEach(d => {
+    const lbl = document.createElement("label"); lbl.className = "chip" + (selectedDocs.has(d.id) ? "" : " off");
+    lbl.innerHTML = '<input type="checkbox"' + (selectedDocs.has(d.id) ? " checked" : "") + '><span class="doc-chip" title="' + esc(d.name) + '">' + esc(d.name) + '</span>';
+    lbl.querySelector("input").onchange = () => { if (lbl.querySelector("input").checked) selectedDocs.add(d.id); else selectedDocs.delete(d.id); renderSrcDocs(); onPickChange(); };
+    box.appendChild(lbl);
+  });
+}
+
+/* ════════════ 渲染 ════════════ */
+function renderList(){
+  const list = currentEntities();
+  const box = $("entList"); box.innerHTML = "";
+  if (mode === "overview") {
+    const total = list.length, pages = Math.max(1, Math.ceil(total / pageSize));
+    if (page > pages - 1) page = pages - 1;
+    const slice = list.slice(page * pageSize, (page + 1) * pageSize);
+    const inList = k => { const w = activeListId ? qr.weakLists.find(x => x.id === activeListId) : null; return w && (w.entityKeys || []).includes(k); };
+    slice.forEach(it => {
+      const card = document.createElement("div"); card.className = "qr-entity";
+      const isOn = revealed.has(it.key);
+      card.innerHTML =
+        '<div class="qr-ehead">' +
+          '<span class="qr-type">' + (it.type === "person" ? "人物" : "地点") + '</span>' +
+          '<span class="qr-name" title="' + esc(it.name) + '">' + esc(it.name) + '</span>' +
+          '<span class="qr-count">' + it.events.length + ' 条事件</span>' +
+          '<button class="star-btn' + (inList(it.key) ? " on" : "") + '" title="标记/取消薄弱点">' + (inList(it.key) ? "★" : "☆") + '</button>' +
+          '<button class="qr-toggle' + (isOn ? " showing" : "") + '">' + (isOn ? "收起事件" : "展示事件") + '</button>' +
+        '</div>' +
+        '<div class="qr-events' + (isOn ? " show" : "") + '"></div>';
+      const star = card.querySelector(".star-btn"); star.onclick = () => { if (window.G_READONLY) { alert("当前为只读端口，不能标记薄弱点。"); return; } toggleStar(it.key); renderList(); };
+      const evBox = card.querySelector(".qr-events");
+      if (isOn) it.events.forEach(x => evBox.appendChild(buildEventUnit(x.ev)));
+      const toggle = card.querySelector(".qr-toggle");
+      toggle.onclick = () => { if (revealed.has(it.key)) revealed.delete(it.key); else revealed.add(it.key); renderList(); };
+      box.appendChild(card);
+    });
+    if (!slice.length) box.innerHTML = '<div class="empty-tip">' + (activeListId ? '当前薄弱点列表中没有命中的人物' + (targetType === "person" ? "（人物）" : "（地点）") + '。<br>请切换列表，或点实体上的 ★ 添加。' : ('暂未找到符合条件的' + (targetType === "person" ? "人物" : "地点") + '。\n请确认：① 已在时间轴中添加含『' + (targetType === "person" ? "（人名）" : "【地点】") + '』标记的事件；② 上方勾选了对应文档。')) + '</div>';
+    renderPagerAndSizeUI(total, pages);
+  } else {
+    renderActive(list);
+  }
+}
+/* 分页 + 每页条数控件 */
+function renderPagerAndSizeUI(total, pages){
+  const box = $("pager"); box.innerHTML = "";
+  box.innerHTML = '<button id="pgPrev">← 上一页</button>' +
+    '<span class="pg-info">第 ' + (page + 1) + ' / ' + pages + ' 页 · 共 ' + total + ' 个' + (targetType === "person" ? "人物" : "地点") + '</span>' +
+    '<button id="pgNext">下一页 →</button>' +
+    '<select id="pgSize" title="每页条数（最多30条）"><option>10</option><option>20</option><option selected>30</option></select>';
+  $("pgPrev").disabled = page <= 0;
+  $("pgNext").disabled = page >= pages - 1;
+  $("pgPrev").onclick = () => { if (page > 0) { page--; window.scrollTo({ top: 0 }); renderList(); } };
+  $("pgNext").onclick = () => { if (page < pages - 1) { page++; window.scrollTo({ top: 0 }); renderList(); } };
+  $("pgSize").value = pageSize;
+  $("pgSize").onchange = e => { pageSize = +e.target.value; page = 0; renderList(); };
+}
+
+/* ════════════ 主动学习 ════════════ */
+function orderedIndex(){ // 当前 activeIdx 在 currentEntities 中的下标
+  const list = currentEntities();
+  if (!list.length) return -1;
+  if (orderMode === "random") { if (!randomOrder.length) rebuildRandom(); let idx = randomOrder[activeIdx]; if (idx >= list.length) { rebuildRandom(); idx = randomOrder[activeIdx]; } return idx; }
+  return activeIdx;
+}
+function rebuildRandom(){ const list = currentEntities(); randomOrder = list.map((_, i) => i); for (let i = randomOrder.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [randomOrder[i], randomOrder[j]] = [randomOrder[j], randomOrder[i]]; } }
+function renderActive(list){
+  const box = $("entList"); box.innerHTML = "";
+  const total = list.length;
+  $("pager").innerHTML = "";
+  if (!total) { box.innerHTML = '<div class="empty-tip">暂无可学习的' + (targetType === "person" ? "人物" : "地点") + '，请先在时间轴添加含对应标记的事件。</div>'; return; }
+  if (activeIdx >= total) activeIdx = total - 1;
+  if (activeIdx < 0) activeIdx = 0;
+  const idx = orderedIndex();
+  const it = list[idx];
+  const card = document.createElement("div"); card.className = "qr-active-card";
+  const inList = k => { const w = activeListId ? qr.weakLists.find(x => x.id === activeListId) : null; return w && (w.entityKeys || []).includes(k); };
+  card.innerHTML =
+    '<div class="qr-ac-head">' +
+      '<span class="qr-type">' + (it.type === "person" ? "人物" : "地点") + '</span>' +
+      '<span class="qr-ac-name" title="' + esc(it.name) + '">' + esc(it.name) + '</span>' +
+      '<button class="star-btn' + (inList(it.key) ? " on" : "") + '" title="标记/取消薄弱点">' + (inList(it.key) ? "★" : "☆") + '</button>' +
+    '</div>' +
+    '<div style="text-align:center;padding:14px 16px;border-top:1px dashed var(--panel-border);">' +
+      '<button id="revealBtn" class="' + (activeRevealed ? "showing" : "") + '">' + (activeRevealed ? "收起事件" : "点击展示相关事件") + '</button>' +
+    '</div>' +
+    '<div class="qr-ac-body' + (activeRevealed ? " show" : "") + '"></div>';
+  card.querySelector(".star-btn").onclick = () => { if (window.G_READONLY) { alert("当前为只读端口，不能标记薄弱点。"); return; } toggleStar(it.key); renderActive(list); };
+  const body = card.querySelector(".qr-ac-body");
+  if (activeRevealed) it.events.forEach(x => body.appendChild(buildEventUnit(x.ev)));
+  const rb = card.querySelector("#revealBtn");
+  rb.onclick = () => { activeRevealed = !activeRevealed; renderActive(list); };
+  box.appendChild(card);
+  box.insertAdjacentHTML("beforeend", '<div class="qr-ac-nav">' +
+    '<button id="acPrev">← 上一' + (targetType === "person" ? "人物" : "地点") + '</button>' +
+    '<span class="pg-info">第 ' + (idx + 1) + ' / ' + total + ' 个' + (targetType === "person" ? "人物" : "地点") + (orderMode === "random" ? " · 随机" : "") + '</span>' +
+    '<button id="acNext">下一' + (targetType === "person" ? "人物" : "地点") + ' →</button></div>');
+  $("acPrev").disabled = idx <= 0;
+  $("acNext").disabled = idx >= total - 1;
+  $("acPrev").onclick = () => { activeIdx--; activeRevealed = false; window.scrollTo({ top: 0 }); renderActive(list); };
+  $("acNext").onclick = () => { activeIdx++; activeRevealed = false; window.scrollTo({ top: 0 }); renderActive(list); };
+}
+
+/* ════════════ 批量显隐 ════════════ */
+$("showAllBtn").onclick = () => { currentEntities().forEach(e => revealed.add(e.key)); renderList(); };
+$("hideAllBtn").onclick = () => { revealed.clear(); renderList(); };
+
+/* ════════════ 薄弱点 ════════════ */
+function toggleStar(key){
+  let list = activeListId ? qr.weakLists.find(w => w.id === activeListId) : null;
+  if (!list) {
+    if (!qr.weakLists.length) { list = { id: uid("wl"), name: "我的薄弱点", entityKeys: [], created: now() }; qr.weakLists.push(list); }
+    else { alert("请先在「⭐ 薄弱点」中选择一个列表作为当前列表，再点星标。"); return; }
+    activeListId = list.id;
+  }
+  const i = list.entityKeys.indexOf(key);
+  if (i >= 0) list.entityKeys.splice(i, 1); else list.entityKeys.push(key);
+  saveQr(); renderWeakSel(); renderList();
+}
+function renderWeakPanel(){
+  const box = $("wlList"); box.innerHTML = "";
+  if (!qr.weakLists.length) { box.innerHTML = '<p class="hint" style="padding:8px;">还没有薄弱点列表。新建一个列表后，点实体上的 ★ 即可收集易混的人物/地点。</p>'; return; }
+  qr.weakLists.forEach(w => {
+    const row = document.createElement("div"); row.className = "wl-row";
+    row.innerHTML = '<span class="wl-name" title="' + esc(w.name) + '">' + esc(w.name) + '</span><span class="wl-count">' + (w.entityKeys || []).length + ' 项</span>';
+    const cur = document.createElement("button");
+    if (activeListId === w.id) { cur.className = "wl-cur"; cur.textContent = "✓ 当前"; cur.disabled = true; }
+    else { cur.textContent = "设为当前"; cur.onclick = () => { activeListId = w.id; renderWeakPanel(); renderWeakSel(); onPickChange(); }; }
+    const ren = document.createElement("button"); ren.textContent = "重命名";
+    ren.onclick = () => { const n = prompt("重命名列表《" + w.name + "》：", w.name); if (n && n.trim()) { w.name = n.trim(); saveQr(); renderWeakPanel(); renderWeakSel(); } };
+    const exp = document.createElement("button"); exp.textContent = "导出";
+    exp.onclick = () => downloadText(JSON.stringify({ weakLists: [w] }, null, 2), (w.name || "薄弱点") + ".json");
+    const del = document.createElement("button"); del.className = "wl-del"; del.textContent = "删除";
+    del.onclick = () => { if (!confirm("删除列表《" + w.name + "》？")) return; qr.weakLists = qr.weakLists.filter(x => x.id !== w.id); if (activeListId === w.id) activeListId = null; saveQr(); renderWeakPanel(); renderWeakSel(); onPickChange(); };
+    row.appendChild(cur); row.appendChild(exp); row.appendChild(ren); row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+function createWeakList(){
+  if (window.G_READONLY) { alert("当前为只读端口，不能新建列表。"); return; }
+  const n = String($("newWlName").value).trim();
+  if (!n) { alert("请输入列表名称。"); return; }
+  qr.weakLists.push({ id: uid("wl"), name: n, entityKeys: [], created: now() });
+  $("newWlName").value = "";
+  activeListId = qr.weakLists[qr.weakLists.length - 1].id;
+  saveQr(); renderWeakPanel(); renderWeakSel(); onPickChange();
+}
+function exportWeakLists(){ downloadText(JSON.stringify({ version: 1, weakLists: qr.weakLists }, null, 2), "速查薄弱点列表.json"); }
+function toggleWlImportBox(){ $("wlImportBox").style.display = $("wlImportBox").style.display === "none" ? "block" : "none"; }
+function doImportWeakLists(){
+  const txt = String($("wlImportTxt").value).trim();
+  if (!txt) { alert("请先粘贴薄弱点 JSON。"); return; }
+  try {
+    const o = JSON.parse(txt);
+    const lists = (Array.isArray(o) ? o : (o.weakLists || [o])).filter(l => l && l.name);
+    if (!lists.length) { alert("JSON 中没有找到薄弱点列表。"); return; }
+    let n = 0;
+    lists.forEach(l => {
+      const hit = qr.weakLists.find(w => w.name === l.name);
+      if (hit) { (l.entityKeys || []).forEach(k => { if (!hit.entityKeys.includes(k)) hit.entityKeys.push(k); }); }
+      else { qr.weakLists.push({ id: uid("wl"), name: l.name, entityKeys: l.entityKeys || [], created: now() }); }
+      n++;
+    });
+    $("wlImportTxt").value = ""; $("wlImportBox").style.display = "none";
+    saveQr(); renderWeakPanel(); renderWeakSel(); onPickChange();
+    alert("导入完成：新增/合并 " + n + " 个列表。");
+  } catch (e) { alert("JSON 解析失败：" + e.message); }
+}
+function renderWeakSel(){
+  const sel = $("weakSel");
+  sel.innerHTML = '<option value="">全部' + (targetType === "person" ? "人物" : "地点") + '</option>';
+  qr.weakLists.forEach(w => { const o = document.createElement("option"); o.value = w.id; o.textContent = "⭐ " + w.name + "（" + (w.entityKeys || []).length + "项）"; if (w.id === activeListId) o.selected = true; sel.appendChild(o); });
+  if (!activeListId) sel.value = "";
+}
+$("weakSel").onchange = e => { activeListId = e.target.value || null; page = 0; activeIdx = 0; revealed.clear(); rebuildRandom(); renderAll(); };
+$("weakBtn").onclick = () => { if (window.G_READONLY) { alert("当前为只读端口，不能管理薄弱点。"); return; } renderWeakPanel(); $("weakModal").classList.add("open"); };
+
+/* ════════════ 打印（排版为信息一览，随当前展开状态，尽量不分页） ════════════ */
+$("printBtn").onclick = () => {
+  const list = currentEntities();
+  if (!list.length) { alert("当前没有可打印的" + (targetType === "person" ? "人物" : "地点") + "。"); return; }
+  const area = $("printArea"); area.innerHTML = "";
+  const h = document.createElement("h2"); h.textContent = (targetType === "person" ? "人物" : "地点") + " · " + (activeListId ? qr.weakLists.find(w => w.id === activeListId).name + "（薄弱点）" : "全部") + "速查总览"; h.style.cssText = "margin:0 0 8px;font-size:18px;color:var(--text);";
+  area.appendChild(h);
+  const sub = document.createElement("div"); sub.textContent = "共 " + list.length + " 个 · " + (orderMode === "random" ? "随机顺序" : "按出现顺序"); sub.style.cssText = "font-size:12px;color:var(--muted);margin-bottom:8px;"; area.appendChild(sub);
+  list.forEach(it => {
+    const card = document.createElement("div"); card.className = "qr-entity";
+    card.innerHTML = '<div class="qr-ehead"><span class="qr-name">' + esc(it.name) + '</span><span class="qr-count">' + it.events.length + ' 条事件</span></div>';
+    const evBox = document.createElement("div"); evBox.className = "qr-events" + (revealed.has(it.key) ? " show" : "");
+    if (revealed.has(it.key)) it.events.forEach(x => evBox.appendChild(buildEventUnit(x.ev)));
+    card.appendChild(evBox); area.appendChild(card);
+  });
+  window.print();
+  area.innerHTML = "";
+};
+
+/* ════════════ 保存离线网页（内嵌时间轴来源数据 + 速查薄弱点数据） ════════════ */
+function wireOffline(){
+  const b = $("offlineBtn"); if (!b) return;
+  b.onclick = async () => {
+    if (window.G_OFFLINE) { alert("当前已是离线副本，直接使用本文件即可。"); return; }
+    if (!(tld.docs || []).length) { alert("当前时间轴还没有任何来源文档，无法导出有内容的离线页。"); return; }
+    let src; try { src = await fetch(location.href).then(r => r.text()); } catch (e) { alert("读取页面源码失败，无法导出离线网页。"); return; }
+    const safe1 = JSON.stringify(tld).replace(/</g, "\\u003c");
+    const safe2 = JSON.stringify(qr).replace(/</g, "\\u003c");
+    const inject = '<script>window.__OFFLINE_DATA=' + safe1 + ';window.__QR_DATA=' + safe2 + ';<\/' + 'script>';
+    const out = (src.indexOf("</head>") > -1) ? src.replace("</head>", inject + "</head>") : src.replace(/<script>/i, inject + "<script>");
+    const blob = new Blob([out], { type: "text/html" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = "速查.offline.html"; a.click();
+    alert("已开始下载离线速查页（含 " + (tld.docs || []).length + " 个时间轴来源 / " + entities.length + " 个" + (targetType === "person" ? "人物" : "地点") + "）。");
+  };
+}
+
+/* ════════════ 工具 ════════════ */
+function downloadText(content, filename){ const blob = new Blob([content], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); }
+function closeMod(id){ $(id).classList.remove("open"); }
+document.querySelectorAll(".modal-backdrop").forEach(m => m.addEventListener("click", e => { if (e.target === m) closeMod(m.id); }));
+
+/* ════════════ 主题 ════════════ */
+function applyThemeUI(){ document.body.className = THEME_ALT[G_THEME] || "theme-parchment"; document.querySelectorAll("#thBox .th-item").forEach(t => t.classList.toggle("active", t.dataset.t === G_THEME)); }
+function pickTheme(t){ if (!THEME_ALT[t]) t = "parchment"; G_THEME = t; applyThemeUI(); if (window.G_READONLY) return; try { fetch("/api/ui/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ version: 1, theme: t }) }).catch(() => {}); } catch (e) {} const h = $("qrHint"); if (h) { h.textContent = "配色已保存到服务器"; clearTimeout(globalThis._thHintTimer); globalThis._thHintTimer = setTimeout(() => { if (h) h.textContent = ""; }, 1200); } }
+function loadGlobalTheme(){ if (window.G_OFFLINE) return; fetch("/api/ui/load").then(r => r.json()).then(j => { if (j && j.ok && j.data && THEME_ALT[j.data.theme]) { G_THEME = j.data.theme; applyThemeUI(); } }).catch(() => {}); }
+$("thBtn").onclick = e => { e.stopPropagation(); $("thBox").classList.toggle("open"); };
+document.addEventListener("click", e => { if ($("thBox") && !$("thBox").contains(e.target) && e.target.id !== "thBtn") $("thBox").classList.remove("open"); });
+
+/* ════════════ 控件 ════════════ */
+function onPickChange(){ extract(); page = 0; activeIdx = 0; activeRevealed = false; revealed.clear(); rebuildRandom(); renderAll(); }
+document.querySelectorAll("#typeRg button").forEach(b => b.onclick = () => { document.querySelectorAll("#typeRg button").forEach(x => x.classList.toggle("active", x === b)); targetType = b.dataset.t; renderWeakSel(); onPickChange(); });
+document.querySelectorAll("#modeRg button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#modeRg button").forEach(x => x.classList.toggle("active", x === b));
+  mode = b.dataset.m; $("orderBox").style.display = mode === "active" ? "flex" : "none";
+  $("listArea").style.display = "block";
+  renderList();
+});
+document.querySelectorAll("#orderRg button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#orderRg button").forEach(x => x.classList.toggle("active", x === b));
+  orderMode = b.dataset.o; $("reshuffle").style.display = orderMode === "random" ? "inline-block" : "none";
+  activeIdx = 0; rebuildRandom(); renderList();
+});
+$("reshuffle").onclick = () => { rebuildRandom(); activeIdx = 0; renderList(); };
+
+/* ════════════ 持久化（服务器 quickref_data.json，不碰 localStorage） ════════════ */
+let syncTimer = null;
+function saveQr(){
+  if (window.G_READONLY) { const h = $("qrHint"); if (h) h.textContent = window.G_OFFLINE ? "离线副本 · 仅供查看" : "只读模式 · 可导出"; return; }
+  const h = $("qrHint"); h.textContent = "已保存到服务器";
+  clearTimeout(saveQr._t); saveQr._t = setTimeout(() => { if (h) h.textContent = "已保存到服务器 · quickref_data.json"; }, 900);
+  clearTimeout(syncTimer); syncTimer = setTimeout(() => { try { fetch("/api/quickref/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(qr) }).then(r => r.json()).then(j => { if (!j.ok) console.warn("自动同步失败", j && j.error); }).catch(e => console.warn("自动同步失败：未连接到服务端？", e)); } catch (e) { console.warn(e); } }, 450);
+}
+
+/* ════════════ 启动 ════════════ */
+function renderAll(){ renderTabsUI(); renderWeakSel(); renderList(); }
+function renderTabsUI(){ /* 速查页无文档标签卡；主体渲染统一入口 */ }
+function boot(){
+  const offline = window.G_OFFLINE;
+  if (offline) { try { tld = window.__OFFLINE_DATA ? clone(window.__OFFLINE_DATA) : { version: 2, docs: [] }; qr = window.__QR_DATA ? clone(window.__QR_DATA) : { version: 1, weakLists: [] }; } catch (e) {} }
+  else { tld = { version: 2, docs: [] }; qr = { version: 1, weakLists: [] }; }
+  (tld.docs || []).forEach(d => selectedDocs.add(d.id));
+  if (!offline) {
+    fetch("/api/load").then(r => r.json()).then(j => { if (j && j.ok && j.data && Array.isArray(j.data.docs)) { tld = j.data; selectedDocs.clear(); (tld.docs || []).forEach(d => selectedDocs.add(d.id)); renderSrcDocs(); extract(); renderAll(); } }).catch(() => {});
+    fetch("/api/quickref/load").then(r => r.json()).then(j => { if (j && j.ok && j.data) { qr = j.data; if (!Array.isArray(qr.weakLists)) qr.weakLists = []; renderWeakSel(); renderList(); } }).catch(() => {});
+    loadGlobalTheme();
+  }
+  renderSrcDocs(); extract(); renderAll();
+  wireOffline();
+}
+boot();
+</script>
+</body>
+</html>

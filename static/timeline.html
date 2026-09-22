@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世界历史 · 时间轴</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%F0%9F%95%B0%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+/* ---------------- 主题变量（每主题一套） ---------------- */
+:root{
+  --bg:#f5efe0; --panel:#fffdf6; --panel-border:#cbbf9e; --text:#3a3228; --muted:#8a7f6c;
+  --time-box:#e8d9b8; --time-border:#8a6d3b; --time-text:#3a2c14;
+  --event-box:#fdf6e3; --event-border:#a8863f; --event-text:#5a4a2e;
+  --detail-box:#fff; --detail-border:#cfc4a8; --detail-text:#555; --arrow:#8a6d3b;
+  --sym-place-bg:#cfe8ff; --sym-place-text:#17517e;
+  --sym-person-bg:#ffe0c9; --sym-person-text:#8a3d12; --sym-dot-color:#c0392b;
+  --lane-label:#fffdf6; --lane-label-border:#cbbf9e; --lane-label-text:#6a5a3a;
+}
+body.theme-ocean{--bg:#ddeef7;--panel:#f4fbfe;--panel-border:#9ec3d6;--text:#1f3a4d;--muted:#76a0b8;
+  --time-box:#bfe0f0;--time-border:#3d7ea6;--time-text:#123646;--event-box:#eaf6fd;--event-border:#5b98ba;--event-text:#2c5b77;
+  --detail-box:#fff;--detail-border:#b6d5e5;--detail-text:#4a6580;--arrow:#3d7ea6;
+  --sym-place-bg:#cfe8ff;--sym-place-text:#17517e;--sym-person-bg:#ffdcd1;--sym-person-text:#8a3418;--sym-dot-color:#c0392b;
+  --lane-label:#f4fbfe;--lane-label-border:#9ec3d6;--lane-label-text:#2c5b77;}
+body.theme-forest{--bg:#e4f0e3;--panel:#f6fbf5;--panel-border:#9fc49a;--text:#23402a;--muted:#7fa37c;
+  --time-box:#cfe6c9;--time-border:#4f7f4a;--time-text:#1f3b24;--event-box:#eef7ec;--event-border:#6f9c69;--event-text:#2f5632;
+  --detail-box:#fff;--detail-border:#bcd6b7;--detail-text:#3f5f45;--arrow:#4f7f4a;
+  --sym-place-bg:#d5ecff;--sym-place-text:#1b587f;--sym-person-bg:#ffe3cc;--sym-person-text:#8a3d12;--sym-dot-color:#a0522d;
+  --lane-label:#f6fbf5;--lane-label-border:#9fc49a;--lane-label-text:#2f5632;}
+body.theme-mono{--bg:#fff;--panel:#fff;--panel-border:#333;--text:#000;--muted:#444;
+  --time-box:#fff;--time-border:#000;--time-text:#000;--event-box:#fff;--event-border:#000;--event-text:#000;
+  --detail-box:#fff;--detail-border:#666;--detail-text:#000;--arrow:#000;
+  --sym-place-bg:#fff;--sym-place-text:#000;--sym-person-bg:#fff;--sym-person-text:#000;--sym-dot-color:#000;
+  --lane-label:#fff;--lane-label-border:#333;--lane-label-text:#000;}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;}
+
+/* 顶部工具栏 */
+#toolbar{position:sticky;top:0;z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  padding:9px 14px;background:var(--panel);border-bottom:2px solid var(--panel-border);
+  box-shadow:0 2px 6px rgba(0,0,0,.06);}
+#toolbar .app-title{font-size:16px;font-weight:700;margin-right:6px;white-space:nowrap;}
+#toolbar button,#toolbar select,#toolbar input{font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);color:var(--text);cursor:pointer;}
+#toolbar button:hover{filter:brightness(.96);}
+#toolbar .sep{width:1px;height:22px;background:var(--panel-border);}
+#titleBox{width:260px;}
+#saveHint{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap;}
+
+/* 文档标签卡（多页面切换；独占工具栏一整行） */
+#docTabs{flex-basis:100%;display:flex;align-items:center;gap:6px;padding:2px 0 7px;margin-bottom:2px;border-bottom:1px dashed var(--panel-border);overflow-x:auto;white-space:nowrap;scrollbar-width:thin;}
+.tl-tab{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:13px;border:1px solid var(--panel-border);border-radius:8px;background:var(--panel);cursor:pointer;color:var(--text);flex:none;max-width:240px;user-select:none;}
+.tl-tab:hover{filter:brightness(.96);}
+.tl-tab.active{background:var(--time-border);color:#fff;border-color:var(--time-border);}
+.tl-tab .tt-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tl-tab .tt-x{margin-left:2px;opacity:.75;font-size:12px;padding:0 2px;border-radius:4px;}
+.tl-tab .tt-x:hover{opacity:1;background:rgba(0,0,0,.15);}
+.tl-tab-add{border-style:dashed;color:var(--muted);}
+@media print{#docTabs{display:none!important;}}
+
+.dropdown{display:none;position:fixed;top:48px;right:12px;min-width:240px;background:var(--panel);
+  border:1px solid var(--panel-border);border-radius:8px;padding:12px;box-shadow:0 8px 22px rgba(0,0,0,.16);z-index:120;}
+.dropdown.open{display:block;}
+.dropdown h4{margin:0 0 8px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--panel-border);padding-bottom:6px;}
+.drop-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:13px;}
+.check{width:16px;height:16px;accent-color:#4c7fb0;cursor:pointer;}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.theme-item{border:2px solid var(--panel-border);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px;}
+.theme-item.active{border-color:#4c7fb0;}
+.theme-swatch{width:26px;height:18px;border:1px solid #999;border-radius:3px;flex:none;}
+
+/* 文明列表面板 */
+#lanePanel{position:fixed;right:0;top:50px;bottom:0;width:300px;z-index:40;background:var(--panel);
+  border-left:2px solid var(--panel-border);transform:translateX(105%);transition:transform .22s;overflow-y:auto;padding:14px;}
+#lanePanel.open{transform:translateX(0);}
+#lanePanel h4{font-size:14px;margin-bottom:6px;}
+#lane{list-style:none;}
+.lane-item{border:1px solid var(--panel-border);border-radius:8px;padding:8px;margin:8px 0;}
+.lane-item.hidden-lane{opacity:.55;}
+.lane-head{display:flex;align-items:center;gap:6px;}
+.lane-head input[type=text]{flex:1;font-size:13px;padding:4px 6px;border:1px solid var(--panel-border);border-radius:4px;}
+.lane-head input[type=color]{width:24px;height:22px;border:none;cursor:pointer;}
+.lane-events{margin-top:6px;}
+.lane-events .ev{font-size:12px;padding:3px 6px;background:var(--bg);border-radius:4px;margin:2px 0;display:flex;justify-content:space-between;align-items:center;gap:4px;}
+.lane-events .ev .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lane-btns{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;}
+.lane-btns button{font-size:12px;padding:3px 7px;border:1px solid var(--panel-border);border-radius:4px;background:var(--panel);cursor:pointer;}
+.icon-btn{cursor:pointer;border:none;background:none;color:var(--muted);padding:0 3px;font-size:14px;}
+.icon-btn:hover{color:#c0392b;}
+
+/* 画布 */
+#scrollWrap{overflow-x:auto;padding:14px 10px 40px;}
+#canvas{position:relative;margin:0 auto;min-height:140px;}
+.lane-row-bg{position:absolute;left:0;top:0;width:100%;height:100%;background:var(--event-box);opacity:.38;border-radius:10px;}
+.lane-label{position:absolute;left:4px;top:0;background:var(--lane-label);border:1.5px solid var(--lane-label-border);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700;color:var(--lane-label-text);z-index:5;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.unit{position:absolute;z-index:6;min-width:118px;display:flex;flex-direction:column;}
+.unit .time-box{height:44px;border-radius:12px;background:var(--time-box);border:2px solid var(--time-border);display:flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;}
+.time-text{font-size:15px;font-weight:700;color:var(--time-text);letter-spacing:1px;}
+.unit .event-box{margin:6px 0;padding:5px 8px;border-radius:10px;background:var(--event-box);border:2px solid var(--event-border);}
+.event-text{font-size:13px;color:var(--event-text);line-height:1.5;word-wrap:break-word;}
+.unit .detail-box{padding:6px 9px;border-radius:10px;background:var(--detail-box);border:1.5px dashed var(--detail-border);}
+/* 空文明行的占位卡片（点击添加第一个事件） */
+.unit.ph-empty .event-box{min-height:36px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;border-style:dashed;font-size:12.5px;background:transparent;}
+.unit.ph-empty:hover .event-box{color:var(--text);border-color:var(--time-border);}
+.lane-new{border-color:#4c7fb0!important;box-shadow:0 0 0 2px rgba(76,127,176,.35);}
+.detail-line{font-size:12.5px;line-height:1.95;color:var(--detail-text);word-wrap:break-word;}
+.sym-ph{display:inline;white-space:pre;visibility:hidden;}   /* 符号隐藏时保留位置 */
+.place{background:var(--sym-place-bg);color:var(--sym-place-text);border-radius:4px;padding:0 3px;font-weight:600;}
+.place u{text-decoration-color:currentColor;text-decoration-thickness:2px;}
+.person{background:var(--sym-person-bg);color:var(--sym-person-text);border-radius:4px;padding:0 3px;font-weight:600;}
+.mk-sym{opacity:.6;font-weight:700;}
+.dot{color:var(--sym-dot-color);text-decoration:underline;text-decoration-color:var(--sym-dot-color);text-decoration-thickness:2px;font-weight:600;}
+#arrowLayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:7;}
+/* 时间轴箭头改用纯 CSS 线条 + 字符箭头（不用 SVG marker，避免某些环境渲染整页白屏） */
+.arrow-line{position:absolute;height:0;border-top:2px solid var(--arrow);pointer-events:none;}
+.arrow-head{position:absolute;font-size:14px;color:var(--arrow);line-height:0;pointer-events:none;}
+.arrow-head:after{content:"▸";}
+
+#legend{position:sticky;top:46px;z-index:30;display:flex;flex-wrap:wrap;gap:16px;background:var(--panel);
+  border:1px solid var(--panel-border);border-radius:8px;padding:6px 14px;margin:10px 14px 0;font-size:12px;color:var(--muted);width:fit-content;}
+#legend .lg{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+#legend .ig{font-weight:700;}
+
+/* 弹窗 */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,15,15,.5);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-backdrop.open{display:flex;}
+.modal{width:600px;max-width:94vw;max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.modal h3{margin-bottom:12px;font-size:16px;border-bottom:2px solid var(--panel-border);padding-bottom:8px;}
+.form-row{margin-bottom:10px;}
+.form-row label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+.form-row input[type=text],.form-row input[type=number],.form-row textarea{width:100%;padding:7px 9px;font-size:13px;font-family:inherit;border:1px solid var(--panel-border);border-radius:6px;color:var(--text);background:#fff;}
+.form-row textarea{resize:vertical;min-height:64px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.hint{font-size:11px;color:var(--muted);margin-top:3px;white-space:pre-line;}
+.small-btns{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.small-btns button{font-size:12px;padding:3px 8px;border:1px solid var(--panel-border);border-radius:4px;background:var(--panel);cursor:pointer;}
+.marker-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
+.marker-row select{flex:none;font-size:12px;padding:5px 6px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);color:var(--text);cursor:pointer;}
+.marker-row input[type=text]{flex:1;padding:6px 8px;font-size:13px;border:1px solid var(--panel-border);border-radius:6px;color:var(--text);background:#fff;}
+.marker-row .rm{cursor:pointer;border:none;background:none;color:#c0392b;font-size:16px;flex:none;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;}
+.modal-actions button{padding:7px 14px;font-size:13px;border-radius:6px;border:1px solid var(--panel-border);cursor:pointer;background:var(--panel);}
+.modal-actions .primary{background:#4c7fb0;color:#fff;border-color:#4c7fb0;}
+.modal-actions .danger{background:#c0392b;color:#fff;border-color:#c0392b;}
+.tab{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.tab button{padding:5px 10px;font-size:13px;border:1px solid var(--panel-border);border-radius:6px;background:var(--panel);cursor:pointer;}
+.tab button.active{background:#4c7fb0;color:#fff;border-color:#4c7fb0;}
+#importArea,#exportArea,#serverArea{display:none;}
+#importArea textarea{width:100%;height:180px;font-family:Consolas,monospace;font-size:12px;border:1px solid var(--panel-border);border-radius:6px;padding:8px;background:#fff;}
+#exportJson{width:100%;height:200px;font-family:Consolas,monospace;font-size:12px;border:1px solid var(--panel-border);border-radius:6px;padding:8px;background:#fff;}
+
+@media (max-width:720px){#lanePanel{width:100%;}#titleBox{width:160px;}#toolbar .app-title{display:none;}}
+
+/* 打印 */
+@media print{
+  body{background:#fff!important;}
+  #toolbar,#lanePanel,#legend,#printHint{display:none!important;}
+  #scrollWrap{overflow:visible;padding:0;}
+  #canvas{transform-origin:top left;}
+}
+</style>
+<style>
+/* ════════════ 侧边栏（参考 sidebar.html；类名统一加 sb- 前缀，避免与页面样式冲突导致白屏） ════════════ */
+:root{--sb-w:64px;--sb-w-open:220px;--sb-bg:#8a6d3b;}
+body.theme-ocean{--sb-bg:#2b6cb0;}
+body.theme-forest{--sb-bg:#2f7d4f;}
+body.theme-mono{--sb-bg:#000;}
+.sb-sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:var(--sb-bg);padding:16px 0;overflow:hidden;overflow-x:hidden;z-index:1000;box-shadow:1px 0 0 rgba(0,0,0,.06);user-select:none;-webkit-tap-highlight-color:transparent;transition:width .26s cubic-bezier(.4,0,.2,1);}
+.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w-open);}
+.sb-item{display:flex;align-items:center;height:56px;margin:2px 8px;padding:0 12px;border-radius:8px;color:#fff;text-decoration:none;white-space:nowrap;transition:background .18s ease;}
+.sb-item:hover,.sb-item:focus-visible{background:rgba(255,255,255,.14);outline:none;}
+.sb-item.sb-active{background:rgba(255,255,255,.24);}
+.sb-ico{flex:0 0 24px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+.sb-ico svg{width:24px;height:24px;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sb-txt{margin-left:16px;font-size:16px;line-height:1;opacity:0;transform:translateX(-6px);transition:opacity .18s ease,transform .18s ease;}
+.sb-sidebar:hover .sb-txt,.sb-sidebar:focus-within .sb-txt{opacity:1;transform:translateX(0);}
+.sb-sidebar:hover .sb-item .sb-txt{transition-delay:.06s;}
+body{padding-left:var(--sb-w);}
+@media (hover:none) and (min-width:721px){.sb-sidebar{width:var(--sb-w-open);}.sb-txt{opacity:1;transform:none;}}
+@media (max-width:720px){:root{--sb-w:56px;--sb-w-open:56px;}.sb-txt{display:none;}.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w);}}
+@media print{.sb-sidebar{display:none!important;}body{padding-left:0!important;}}
+</style>
+</head>
+<body class="theme-parchment">
+<!-- ════════════ 侧边栏导航 ════════════ -->
+<aside class="sb-sidebar" aria-label="主导航">
+  <nav>
+    <a class="sb-item" href="/" title="主页"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M3.5 10.4 12 3.6l8.5 6.8"/><path d="M5.8 9.6V20h12.4V9.6"/><path d="M9.9 20v-5.2h4.2V20"/></svg></span><span class="sb-txt">主页</span></a>
+    <a class="sb-item" href="/timeline.html" title="时间轴"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12"/><path d="M12 12l3.6 2.4"/></svg></span><span class="sb-txt">时间轴</span></a>
+    <a class="sb-item" href="/qa.html" title="问答练习"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M9 18.2 4.2 20.4l1.1-4.3A6.9 6.9 0 1 1 9 18.2Z"/><path d="M12 8.2v1.3"/><path d="M12 12.4h.01"/></svg></span><span class="sb-txt">问答练习</span></a>
+    <a class="sb-item" href="/quickref.html" title="速查"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="10.6" cy="10.6" r="6.4"/><path d="M15.4 15.4 20 20"/><path d="M8 10.6h5.2"/></svg></span><span class="sb-txt">速查</span></a>
+    <a class="sb-item" href="/settings.html" title="设置"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06A2 2 0 1 1 7.03 4.24l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.26.58.84.93 1.51 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg></span><span class="sb-txt">设置</span></a>
+  </nav>
+</aside>
+<script>
+(function(){var p=(location.pathname.split("/").pop()||"index.html");document.querySelectorAll(".sb-item").forEach(function(a){var h=(a.getAttribute("href")||"").split("/").pop();if(h===p)a.classList.add("sb-active");});})();
+</script>
+<!-- ════════════ /侧边栏 ════════════ -->
+
+<div id="toolbar">
+  <div id="docTabs"></div>
+  <span class="app-title">📜 历史 · 时间轴</span>
+  <input id="titleBox" type="text" placeholder="标题">
+  <span class="sep"></span>
+  <select id="layoutSel" title="布局方式">
+    <option value="scale">等比缩放（严格比例尺）</option>
+    <option value="relative">相对排列（先后+最小间距）</option>
+  </select>
+  <select id="pxSel" title="等比模式下每百年像素（越小越紧凑）">
+    <option value="15">每百年15px</option>
+    <option value="30" selected>每百年30px</option>
+    <option value="50">每百年50px</option>
+    <option value="80">每百年80px</option>
+    <option value="120">每百年120px</option>
+  </select>
+  <span class="sep"></span>
+  <button id="laneBtn">🏛 文明</button>
+  <button id="themeBtn">🎨 配色</button>
+  <button id="showBtn">👁 显隐</button>
+  <button id="dataBtn">⚙ 数据</button>
+  <span class="sep"></span>
+  <button id="printBtn" style="background:#2e6b45;color:#fff;border-color:#2e6b45;">🖨 打印PDF</button>
+  <button id="offlineBtn" title="下载一个包含当前全部内容的离线网页" style="background:#8a5a3b;color:#fff;border-color:#8a5a3b;">💾 保存离线网页</button>
+  <span id="saveHint">已自动保存 · 同步服务器</span>
+</div>
+
+<div id="legend">
+  <span class="lg"><span class="ig" style="color:var(--sym-place-text);">【】</span>地点</span>
+  <span class="lg"><span class="ig" style="color:var(--sym-person-text);">（）</span>人名</span>
+  <span class="lg"><span class="ig" style="color:var(--sym-dot-color);">___</span>分点记忆（顿号分隔）</span>
+</div>
+
+<!-- 显隐 -->
+<div id="showBox" class="dropdown">
+  <h4>元素显隐（时间框、箭头始终显示；隐藏的行将补位不留白）</h4>
+  <div class="drop-row"><label>时间框中的时间文字</label><input class="check" type="checkbox" data-k="timeText" checked></div>
+  <div class="drop-row"><label>事件框（整体）</label><input class="check" type="checkbox" data-k="eventBox" checked></div>
+  <div class="drop-row"><label>事件框中的事件文字</label><input class="check" type="checkbox" data-k="eventText" checked></div>
+  <div class="drop-row"><label>详细信息框（整体）</label><input class="check" type="checkbox" data-k="detailBox" checked></div>
+  <div class="drop-row"><label>详细框：标志符号</label><input class="check" type="checkbox" data-k="detailSymbol" checked></div>
+  <div class="drop-row"><label>详细框：文字</label><input class="check" type="checkbox" data-k="detailText" checked></div>
+</div>
+
+<!-- 配色（全局统一：任一页面切换后所有页面保持一致，主题存于服务器 ui_config.json） -->
+<div id="themeBox" class="dropdown" style="width:300px;">
+  <h4>配色方案（全局统一）</h4>
+  <div class="theme-grid">
+    <div class="theme-item active" data-t="parchment" onclick="pickTheme('parchment')"><span class="theme-swatch" style="background:#f5efe0"></span>羊皮纸</div>
+    <div class="theme-item" data-t="ocean" onclick="pickTheme('ocean')"><span class="theme-swatch" style="background:#ddeef7"></span>海洋蓝</div>
+    <div class="theme-item" data-t="forest" onclick="pickTheme('forest')"><span class="theme-swatch" style="background:#e4f0e3"></span>自然绿</div>
+    <div class="theme-item" data-t="mono" onclick="pickTheme('mono')"><span class="theme-swatch" style="background:#fff"></span>打印黑白</div>
+  </div>
+</div>
+
+<!-- 文明管理 -->
+<div id="lanePanel">
+  <h4>🏛 文明 / 横行管理&nbsp;<small style="color:var(--muted);font-weight:normal;">勾选=显示，取消=整行隐藏（补位）</small></h4>
+  <ul id="lane"></ul>
+  <button id="addLaneBtn" style="width:100%;padding:8px;border:1px dashed var(--panel-border);border-radius:8px;background:var(--panel);cursor:pointer;color:var(--muted);">＋ 添加文明 / 横行</button>
+</div>
+
+<div id="scrollWrap"><div id="canvas"></div><div id="printHint" style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px;">横屏下滑可横向滚动；点「🖨 打印PDF」即可把当前显示原样打印/另存为PDF。默认已开启「适合页面宽度」缩放策略，在打印预览中也可自行调整缩放。</div></div>
+
+<!-- 数据弹窗 -->
+<div id="dataModal" class="modal-backdrop">
+  <div class="modal" style="width:640px;">
+    <h3>⚙ 数据管理</h3>
+    <div class="tab">
+      <button class="active" onclick="switchDataTab(this,'export')">导出 JSON</button>
+      <button onclick="switchDataTab(this,'import')">导入 JSON</button>
+      <button onclick="switchDataTab(this,'server')">保存到服务器</button>
+    </div>
+    <div id="exportArea">
+      <p class="hint">导出当前全部数据为 JSON（备份/分享用）。格式说明见 <b>README.md</b>。</p>
+      <textarea id="exportJson" readonly></textarea>
+      <div class="modal-actions"><button onclick="copyExport()">复制</button><button onclick="downloadJson()">下载 .json</button></div>
+    </div>
+    <div id="importArea">
+      <p class="hint">粘贴 JSON 后点下方按钮，将<b>覆盖</b>当前数据（请先导出备份）。</p>
+      <textarea id="importJson" placeholder="在此粘贴 JSON 数据…"></textarea>
+      <div class="modal-actions"><button class="danger" onclick="importJson()">导入并覆盖</button></div>
+    </div>
+    <div id="serverArea">
+      <p class="hint"><b>已启用自动同步：</b>你对内容的每次修改都会自动写入项目下的 <b>data.json</b>，无需手动操作。下方按钮只是手动兜底（如服务器断线后补写）。启动时若浏览器无本地数据，会自动读取服务器上的 data.json 恢复。</p>
+      <div class="modal-actions"><button onclick="saveToServer()">立即保存到服务器</button><button onclick="loadFromServer()">从服务器加载</button></div>
+      <p id="serverMsg" class="hint"></p>
+    </div>
+  </div>
+</div>
+
+<!-- 事件弹窗 -->
+<div id="eventModal" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="evTitle">编辑事件</h3>
+    <input type="hidden" id="ev_laneId"><input type="hidden" id="ev_eventId">
+    <div class="form-row">
+      <label>时间文字（显示用，例如：公元前3100年前后 / 公元前21世纪 / 公元476年 / 公元1949年10月1日）</label>
+      <input type="text" id="ev_timeText" placeholder="公元前3100年前后">
+      <div class="small-btns">
+        <button onclick="parseTimeFromText()">↗ 从上方文字自动算出年月日并填入</button>
+        <button onclick="alert('换算规则：\n【公元前N世纪】→ 始 −N×100+1 ，终 −(N−1)×100（例 前21世纪=−2101~−2000）\n【N世纪】→ 始 (N−1)×100+1 ，终 N×100（例 1世纪=1~100）\n【公元前N年】→ −N；【N年】→ N\n【年月日】→ 在年份基础上再填月/日，例如 公元1949年10月1日 → 起始年份 1949、起始月 10、起始日 1\n你也可以直接在右侧框里手填负数来表示公元前。月/日留空视为 1月1日。')">世纪↔年换算帮助</button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label>起始年份（数值，<b>公元前用负数</b>，必需）</label><input type="number" id="ev_startYear" placeholder="例：-3100"></div>
+      <div class="form-row"><label>起始月（1-12，可选；默认1月）</label><input type="number" id="ev_startMonth" min="1" max="12" placeholder="1"></div>
+      <div class="form-row"><label>起始日（1-31，可选；默认1日）</label><input type="number" id="ev_startDay" min="1" max="31" placeholder="1"></div>
+      <div class="form-row"><label>结束年份（数值，可选；空=单点）</label><input type="number" id="ev_endYear" placeholder="留空=单点"></div>
+      <div class="form-row"><label>结束月（1-12，可选；默认1月）</label><input type="number" id="ev_endMonth" min="1" max="12" placeholder="1"></div>
+      <div class="form-row"><label>结束日（1-31，可选；默认1日）</label><input type="number" id="ev_endDay" min="1" max="31" placeholder="1"></div>
+    </div>
+    <div class="form-row"><label>事件文字</label><input type="text" id="ev_eventText" placeholder="例：埃及初步实现统一"></div>
+    <div class="form-row">
+      <label>详细信息（逐条添加：先选类型再填内容，保存后自动套用标记）</label>
+      <div id="detailRows"></div>
+      <div class="small-btns"><button onclick="addDetailRow('text','')">＋ 添加一条信息</button></div>
+      <p class="hint">每一条=一种类型，类型会在展示时自动加上对应标记并提供语义颜色：
+普通文字（无标记） → 直接显示；
+【地点】→ 蓝色字块；　（人名）→ 橙色字块；　分点记忆 → 红色下划线。
+其中“分点记忆”一个框可填多个要点，用顿号、分隔，例：中央集权、文字、多神（会生成 _中央集权_、_文字_、_多神_）。
+顺序即显示顺序，可点击每个条目右侧 ✕ 删除。</p>
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeMod('eventModal')">取消</button>
+      <button class="danger" id="ev_del" style="display:none" onclick="deleteCurrentEvent()">删除此事件</button>
+      <button class="primary" onclick="saveEvent()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ════════════ 数据 ════════════ */
+const LS_KEY="worldhistory_timeline_v1";
+const CC_mapping=[];
+const THEME_ALT={"parchment":"theme-parchment","ocean":"theme-ocean","forest":"theme-forest","mono":"theme-mono"};
+const DEFAULT_GLOBAL={layout:"scale",pxPer100:30,theme:"parchment",
+  customColors:{bg:"#f5efe0",timeBox:"#e8d9b8",timeBorder:"#8a6d3b",eventBox:"#fdf6e3",eventBorder:"#a8863f",
+    detailBox:"#ffffff",detailBorder:"#cfc4a8",symPlace:"#cfe8ff",symPerson:"#ffe0c9",symDot:"#c0392b"},
+  show:{timeText:true,eventBox:true,eventText:true,detailBox:true,detailSymbol:true,detailText:true}};
+/* 多文档格式：data={version:2, docs:[{id,name,created,title,globalOptions,lanes}]}，curDocId 为当前文档 */
+const DEFAULT_DATA={version:2,docs:[]};
+let data={version:2,docs:[]},curDocId=null;
+function now(){const d=new Date();const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
+function newDoc(){return {id:uid("doc"),name:"新时间轴",created:now(),title:"世界历史 时间线",globalOptions:clone(DEFAULT_GLOBAL),lanes:[]};}
+function cur(){return data.docs.find(d=>d.id===curDocId)||data.docs[0]||null;}
+
+/* 模式标志：
+   G_OFFLINE  = 通过“保存离线网页”生成的单文件副本，内嵌 window.__OFFLINE_DATA，不连服务器。
+   G_READONLY = 只读（8424 端口或离线副本）：只能查看/导出，禁止更改内容。 */
+window.G_OFFLINE = window.__OFFLINE_DATA !== undefined;
+window.G_READONLY = (location.port === "8424") || window.G_OFFLINE;
+
+/* 全局错误捕获：任何 JS 报错都在页面左下角显示出来，避免“白屏却不知道原因” */
+window.addEventListener('error', function (evt) {
+  try {
+    var msg = (evt && (evt.message || (evt.error && evt.error.message))) || '';
+    var ln = (evt && evt.lineno) ? (' @' + evt.lineno) : '';
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#c0392b;color:#fff;padding:10px 12px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;box-shadow:0 2px 8px rgba(0,0,0,.4);';
+    box.textContent = '页面脚本错误: ' + msg + ln;
+    document.body.appendChild(box);
+    try { document.title = '页面脚本错误: ' + msg + ln; } catch (_t) {}
+  } catch (_e) {}
+});
+
+const $=id=>document.getElementById(id);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const uid=()=>"u"+Date.now().toString(36)+String(Math.random()).slice(2,7);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* 世纪/年/月/日 ↔ 数值。
+   返回值：{start,end,sm,sd,em,ed}，其中 sm/sd/em/ed 为月/日（1 起，缺省为 1）。 */
+function parseEra(txt){
+  const s=String(txt||"").replace(/\s+/g,"");
+  let m=s.match(/^公元前(.+?)世纪/); if(m){const n=+m[1];if(n>0&&n<100)return{start:-n*100+1,end:-(n-1)*100,sm:1,sd:1,em:1,ed:1};}
+  m=s.match(/^(?:公元)?([0-9]+)世纪/); if(m){const n=+m[1];if(n>0&&n<100)return{start:(n-1)*100+1,end:n*100,sm:1,sd:1,em:1,ed:1};}
+  // 公元前N年[ M月[ D日] ]（无结尾约束，允许“公元前3100年前后”这类原文）
+  m=s.match(/^公元前([0-9]+)年(?:([0-9]{1,2})月(?:([0-9]{1,2})日)?)?/); if(m){const n=+m[1];const mo=+m[2]||1,da=+m[3]||1;return{start:-n,end:-n,sm:mo,sd:da,em:mo,ed:da};}
+  // 公元N年[ M月[ D日] ]（须以日期收尾，避免把“公元476年西罗马灭亡”整句当日期）
+  m=s.match(/^(?:公元)?([0-9]+)年(?:([0-9]{1,2})月(?:([0-9]{1,2})日)?)?$/); if(m){const n=+m[1];const mo=+m[2]||1,da=+m[3]||1;return{start:n,end:n,sm:mo,sd:da,em:mo,ed:da};}
+  if(/^-?[0-9]+$/.test(s)){const n=parseInt(s,10);return{start:n,end:n,sm:1,sd:1,em:1,ed:1};}
+  return null;
+}
+const fmtYear=y=>y<0?("公元前"+(-y)+"年"):("公元"+y+"年");
+/* 事件起止时间 → 连续数值（年 + 月/12 + 日/365），用于排序与等比定位；月/日缺省按 1月1日 */
+function tNum(y,m,d){ y=+y||0; m=+m||1; d=+d||1; return y+(m-1)/12+(d-1)/365; }
+function evStart(ev){ return tNum(ev.startYear,ev.startMonth,ev.startDay); }
+function evEnd(ev){
+  if(ev.endYear==null||String(ev.endYear).trim()==="") return evStart(ev);   // 单点
+  const sy=+ev.startYear||0, ey=+ev.endYear||sy;
+  return tNum(ey,ev.endMonth,ev.endDay);
+}
+
+/* ════════════ 主题（全局统一：主题存于服务器 ui_config.json，所有页面共享） ════════════ */
+let G_THEME="parchment";
+function applyTheme(){
+  document.body.className=THEME_ALT[G_THEME]||"theme-parchment";
+  document.querySelectorAll("#themeBox .theme-item").forEach(t=>t.classList.toggle("active",t.dataset.t===G_THEME));
+}
+function pickTheme(t){
+  if(!THEME_ALT[t]) t="parchment";
+  G_THEME=t; applyTheme(); renderAll();
+  if(window.G_READONLY){
+    const h=$("saveHint");if(h)h.textContent=window.G_OFFLINE?"离线副本 · 配色仅本页临时生效":"只读模式 · 配色仅本页临时生效";
+    return;
+  }
+  // 写入服务器全局配置，让主页/问答页/时间轴保持一致
+  try{ fetch("/api/ui/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({version:1,theme:t})}).catch(()=>{}); }catch(e){}
+  const h=$("saveHint");h.textContent="配色已保存到服务器";clearTimeout(saveHint._t);saveHint._t=setTimeout(()=>h.textContent="已自动保存 · 同步服务器",900);
+}
+function loadGlobalTheme(){
+  if(window.G_OFFLINE)return;
+  fetch("/api/ui/load").then(r=>r.json()).then(j=>{
+    if(j&&j.ok&&j.data&&THEME_ALT[j.data.theme]){ G_THEME=j.data.theme; applyTheme(); }
+  }).catch(()=>{});
+}
+
+/* ════════════ 持久化 ════════════ */
+function saveLocal(){
+  if(window.G_READONLY){
+    const h=$("saveHint");if(h)h.textContent=window.G_OFFLINE?"离线副本 · 仅供查看":"只读模式 · 可导出";
+    return;
+  }
+  // 数据以服务器 data.json 为唯一存储，不再写入浏览器 localStorage，
+  // 避免不同访问方式(localhost/127.0.0.1/局域网IP/平板)之间本地数据串扰或白屏。
+  const h=$("saveHint");h.textContent="已保存到服务器";clearTimeout(saveLocal._t);saveLocal._t=setTimeout(()=>h.textContent="已保存到服务器 · data.json",900);
+  scheduleSync();
+}
+/* 自动同步到服务器 data.json（防抖） */
+let syncTimer=null;
+function scheduleSync(){ clearTimeout(syncTimer); syncTimer=setTimeout(()=>{ syncTimer=null; doSync(); },450); }
+function doSync(){
+  try{ fetch("/api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)})
+       .then(r=>r.json()).then(j=>{ if(j&&j.ok){ } else { console.warn("自动同步失败",j&&j.error); } })
+       .catch(e=>console.warn("自动同步失败：未连接到服务端？",e)); }catch(e){ console.warn(e); }
+}
+/* 归一化（补齐缺省字段；兼容旧单文档格式自动迁移为多文档） */
+function normalize(o){
+  o=o||{};
+  // 旧版单文档格式（有 lanes 无 docs）→ 包装成多文档
+  if(!Array.isArray(o.docs)&&Array.isArray(o.lanes)){
+    o={version:2,docs:[{id:uid("doc"),name:o.title||"时间轴",created:now(),title:o.title||"世界历史 时间线",globalOptions:o.globalOptions||{},lanes:o.lanes}]};
+  }
+  if(!Array.isArray(o.docs))o.docs=[];
+  if(!o.docs.length)o.docs.push(newDoc());
+  o.docs.forEach(d=>{
+    if(!d.id)d.id=uid("doc");
+    if(!d.name)d.name=d.title||"未命名时间轴";
+    if(!d.created)d.created=now();
+    d.globalOptions=Object.assign(clone(DEFAULT_GLOBAL),d.globalOptions||{});
+    d.globalOptions.show=Object.assign(clone(DEFAULT_GLOBAL.show),d.globalOptions.show||{});
+    d.globalOptions.customColors=Object.assign(clone(DEFAULT_GLOBAL.customColors),d.globalOptions.customColors||{});
+    if(!Array.isArray(d.lanes))d.lanes=[];
+  });
+  return o;
+}
+
+/* ════════════ 详情行渲染 ════════════ */
+function renderDetailLine(line,showSym,showTxt){
+  const box=document.createElement("div");box.className="detail-line";
+  if(!showTxt&&!showSym){return box;}
+  const re=/【[^】]*】|（[^）]*）|_[^_]*_/g;let last=0,m;const segs=[];
+  while((m=re.exec(line))){ if(m.index>last)segs.push({t:"txt",v:line.slice(last,m.index)});segs.push({t:m[0][0],v:m[0]});last=re.lastIndex; }
+  if(last<line.length)segs.push({t:"txt",v:line.slice(last)});
+  for(const s of segs){
+    if(s.t==="txt"){
+      if(showTxt)box.appendChild(document.createTextNode(s.v));
+      else if(s.v.trim())box.appendChild(sp(s.v));
+    } else if(s.t==="【"){ const v=s.v.slice(1,-1); renderMark(box,v,"place",showSym,showTxt); }
+    else if(s.t==="（"){ const v=s.v.slice(1,-1); renderMark(box,v,"person",showSym,showTxt); }
+    else if(s.t==="_"){ const v=s.v.slice(1,-1); renderMark(box,v,"dot",showSym,showTxt); }
+  }
+  return box;
+}
+function renderMark(box,v,cls,showSym,showTxt){
+  if(cls==="place"||cls==="person"){
+    const L=cls==="place"?"【":"（", R=cls==="place"?"】":"）";
+    if(!showSym&&!showTxt)return;
+    const sp=document.createElement("span");sp.className=cls;
+    if(showSym){const s=document.createElement("span");s.className="mk-sym";s.textContent=L;sp.appendChild(s);}
+    if(showTxt){const u=document.createElement("u");u.textContent=v;sp.appendChild(u);}
+    if(showSym){const s2=document.createElement("span");s2.className="mk-sym";s2.textContent=R;sp.appendChild(s2);}
+    box.appendChild(sp);
+  } else { // dot 分点
+    if(!showSym&&!showTxt)return;
+    const sp=document.createElement("span");sp.className="dot";
+    const u=document.createElement("u");u.textContent=showTxt?v:"    ";sp.appendChild(u);
+    box.appendChild(sp);
+  }
+}
+function sp(v){const s=document.createElement("span");s.className="sym-ph";s.textContent=v;return s;}
+
+/* ════════════ 事件单元构建（测量/渲染复用） ════════════ */
+function buildUnit(ev){
+  const show=cur().globalOptions.show;
+  const unit=document.createElement("div");unit.className="unit";
+  const tb=document.createElement("div");tb.className="time-box";
+  if(show.timeText && ev.timeText){const t=document.createElement("span");t.className="time-text";t.textContent=ev.timeText;tb.appendChild(t);}
+  unit.appendChild(tb);
+  if(show.eventBox){
+    const eb=document.createElement("div");eb.className="event-box";
+    if(show.eventText && ev.eventText){const t=document.createElement("span");t.className="event-text";t.textContent=ev.eventText;eb.appendChild(t);}
+    unit.appendChild(eb);
+  }
+  if(show.detailBox && Array.isArray(ev.details)&&ev.details.length){
+    const db=document.createElement("div");db.className="detail-box";
+    ev.details.forEach(d=>{ if(d==null||d==="")return; db.appendChild(renderDetailLine(String(d),show.detailSymbol,show.detailText)); });
+    unit.appendChild(db);
+  }
+  return unit;
+}
+
+/* ════════════ 画布渲染 ════════════ */
+function renderCanvas(){
+  const cvs=$("canvas");cvs.innerHTML="";
+  const lanes=(cur().lanes||[]).filter(l=>l.visible!==false);
+  if(!lanes.length){cvs.style.cssText="height:200px;";const d=document.createElement("div");d.style.cssText="position:absolute;top:0;left:0;font-size:14px;color:var(--muted);";d.innerHTML="暂无文明/事件。点工具栏「🏛 文明」添加，或用「⚙ 数据 → 导入 JSON」一次导入。";cvs.appendChild(d);return;}
+
+  const o=cur().globalOptions,LBLW=104;
+  // 1) 收集时间范围（含月/日小数部分，取整到相邻整数年，保证坐标轴刻度完整覆盖）
+  let gmin=Infinity,gmax=-Infinity;
+  lanes.forEach(l=>(l.events||[]).forEach(ev=>{const a=Math.floor(Math.min(evStart(ev),evEnd(ev))),b=Math.ceil(Math.max(evStart(ev),evEnd(ev)));if(a<gmin)gmin=a;if(b>gmax)gmax=b;}));
+  if(!isFinite(gmin))gmin=0;if(gmin===gmax){gmin-=200;gmax+=200;}
+  let px=(o.pxPer100||30)/100, minGap = o.layout==="relative" ? 34 : 22;
+  // 超大时间跨度保护：等比模式下把画布宽度限制在一个安全上限内，
+  // 防止 300 万年前这类跨度把画布撑到几百万像素宽、导致浏览器卡死/白屏。
+  px = Math.min(px, 60000 / Math.max(1, gmax - gmin));
+
+  let y=20;let canvasWidth=LBLW+200;
+
+  function measure(ev){const pr=document.createElement("div");pr.style.cssText="position:absolute;left:0;top:0;visibility:hidden;";const u=buildUnit(ev);pr.appendChild(u);cvs.appendChild(pr);const m={w:u.offsetWidth,h:u.offsetHeight};cvs.removeChild(pr);return m;}
+  function addPlaceholder(cvs,lane,yy,LBLW){const ro=window.G_READONLY;const ph=document.createElement("div");ph.className="unit ph-empty";ph.style.cssText="left:"+(LBLW+10)+"px;top:"+(yy+2)+"px;min-width:190px;";ph.innerHTML='<div class="time-box"></div><div class="event-box"><span>'+(ro?"本文明暂无事件":"＋ 添加该文明第一个事件")+'</span></div>';if(!ro)ph.addEventListener("click",(e)=>{e.stopPropagation();openEvent(lane.id,null);$("lanePanel").classList.add("open");});cvs.appendChild(ph);}
+  /* 相邻事件之间画一条 CSS 水平箭头（不用 SVG，避免渲染异常） */
+  function addArrow(cv,x1,yy,x2){
+    if(x2<=x1+4)return;
+    const line=document.createElement("div");line.className="arrow-line";
+    line.style.cssText="left:"+x1+"px;top:"+yy+"px;width:"+(x2-x1-8)+"px;";cv.appendChild(line);
+    const head=document.createElement("div");head.className="arrow-head";
+    head.style.cssText="left:"+(x2-6)+"px;top:"+yy+"px;";cv.appendChild(head);
+  }
+
+  /* ---- 相对排列：所有文明共享一条横轴，按时间先后全局排布 ----
+     这样不同文明的前后时间框之间也存在明确的先后顺序（如：BCE1000在前，BCE502居中，BCE500在后）。 */
+  if(o.layout==="relative"){
+    const all=[];
+    lanes.forEach(lane=>{(lane.events||[]).forEach(ev=>{const m=measure(ev);all.push({lane,ev,w:m.w,h:m.h});});});
+    all.sort((a,b)=>eventSort(a.ev,b.ev));
+    const pos=new Map();let cursor=LBLW+6;
+    // 按时间分组：起止时刻（年月日）完全相同的事件共享同一横坐标，竖直对齐；
+    // 只有进入下一个不同时刻时才把游标右移一个最小间距。
+    let i=0;
+    while(i<all.length){
+      const y=evStart(all[i].ev);
+      let j=i;
+      while(j<all.length){ if(evStart(all[j].ev)!==y)break; j++; }
+      const left=cursor+minGap;let maxR=left;
+      for(let k=i;k<j;k++){ const a=all[k]; pos.set(a.ev,{left,width:a.w,h:a.h}); maxR=Math.max(maxR,left+a.w); canvasWidth=Math.max(canvasWidth,left+a.w+140); }
+      cursor=maxR;i=j;
+    }
+    for(const lane of lanes){
+      const my=(lane.events||[]).map(ev=>({ev,p:pos.get(ev)})).filter(x=>x.p).sort((a,b)=>a.p.left-b.p.left);
+      const rowH=my.length?(Math.max(44,...my.map(m=>m.p.h))+10):100;
+      const bg=document.createElement("div");bg.className="lane-row-bg";bg.style.cssText="top:"+y+"px;height:"+(rowH-8)+"px;";cvs.appendChild(bg);
+      for(const it of my){const u=buildUnit(it.ev);u.style.cssText="left:"+it.p.left+"px;top:"+y+"px;width:"+it.p.width+"px;";cvs.appendChild(u);}
+      if(!my.length)addPlaceholder(cvs,lane,y,LBLW);
+      const label=document.createElement("div");label.className="lane-label";label.style.cssText="top:"+(y+2)+"px;";if(lane.color)label.style.borderColor=lane.color;label.textContent=lane.name||"未命名";cvs.appendChild(label);
+      const ay=y+22;
+      for(let i=0;i<my.length-1;i++){const A=my[i],B=my[i+1];const x1=A.p.left+A.p.width,x2=B.p.left;if(x2>x1+4)addArrow(cvs,x1,ay,x2);}
+      y+=rowH+34;
+    }
+  }
+  /* ---- 等比：严格按年份比例尺定位（不同文明天然对齐）---- */
+  else{
+    for(const lane of lanes){
+      const metas=(lane.events||[]).map(ev=>{const m=measure(ev);return{ev,w:m.w,h:m.h};});
+      const rowH=metas.length?(Math.max(44,...metas.map(m=>m.h))+10):100;
+      const bg=document.createElement("div");bg.className="lane-row-bg";bg.style.cssText="top:"+y+"px;height:"+(rowH-8)+"px;";cvs.appendChild(bg);
+      const placed=[];let cursor=LBLW+6;
+      const sorted=metas.slice().sort((a,b)=>eventSort(a.ev,b.ev));
+      for(const m of sorted){
+        const s=evStart(m.ev),e=evEnd(m.ev);
+        const ax=(Math.min(s,e)-gmin)*px,bx=(Math.max(s,e)-gmin)*px;
+        let left,width;
+        if(bx-ax>=m.w){left=ax;width=bx-ax;} else {width=m.w;left=(ax+bx)/2-width/2;}
+        left=Math.max(left,cursor+minGap,LBLW+6);
+        cursor=left+width;
+        placed.push({...m,left,width});
+        canvasWidth=Math.max(canvasWidth,left+width+140);
+      }
+      for(const p of placed){const u=buildUnit(p.ev);u.style.cssText="left:"+p.left+"px;top:"+y+"px;";cvs.appendChild(u);}
+      if(!placed.length)addPlaceholder(cvs,lane,y,LBLW);
+      const label=document.createElement("div");label.className="lane-label";label.style.cssText="top:"+(y+2)+"px;";if(lane.color)label.style.borderColor=lane.color;label.textContent=lane.name||"未命名";cvs.appendChild(label);
+      const ordered=placed.slice().sort((a,b)=>a.left-b.left);const ay=y+22;
+      for(let i=0;i<ordered.length-1;i++){const A=ordered[i],B=ordered[i+1];const x1=A.left+A.width,x2=B.left;if(x2>x1+4)addArrow(cvs,x1,ay,x2);}
+      y+=rowH+34;
+    }
+  }
+
+  // 画布尺寸安全钳制：避免任何异常计算把画布撑到极端尺寸导致浏览器渲染异常白屏
+  canvasWidth=Math.min(Math.max(canvasWidth, LBLW+200), 60000);
+  y=Math.min(Math.max(y, 20), 60000);
+  cvs.style.cssText="width:"+canvasWidth+"px;height:"+y+"px;";
+  if(o.layout==="scale"&&lanes.length){drawAxis(gmin,gmax,px,LBLW);}
+}
+function eventSort(a,b){const as=evStart(a),bs=evStart(b);return as-bs;}
+function maxWrap(a,b,w){return (a+b)/2-w/2;}
+function drawAxis(gmin,gmax,px,LBLW){
+  const cvs=$("canvas");
+  const baseline=document.createElement("div");baseline.style.cssText="position:absolute;top:0;left:"+LBLW+"px;right:0;height:1px;background:var(--muted);";
+  cvs.appendChild(baseline);
+  const step=chooseStep(gmin,gmax,px);
+  // 只画能放下标尺的点位：前后各留一点余量，兼顾首尾刻度可见
+  const first=Math.ceil((gmin- (px>0? 200:0))/step)*step;
+  for(let yr=first;yr<=gmax;yr+=step){
+    const t=document.createElement("span");t.textContent=fmtYear(yr);
+    t.style.cssText="position:absolute;top:0;transform:translateX(-50%);font-size:11px;color:var(--muted);white-space:nowrap;background:var(--bg);padding:0 4px;";
+    t.style.left=(LBLW+(yr-gmin)*px)+"px";
+    cvs.appendChild(t);
+  }
+}
+/* 步长自适应：根据“每百年像素”算出标签不重叠所需的最小跨度年数 */
+function chooseStep(gmin,gmax,px){
+  const range=gmax-gmin;
+  const minPx=88;                 // 相邻年份刻度标签的最小水平间距
+  const minYears=Math.ceil(minPx/((px||20)/100)); // 至少要隔多少年才不会叠
+  const candidates=[100,200,250,500,1000,2000,2500,5000,10000,20000,50000];
+  let step=candidates[candidates.length-1];
+  for(const c of candidates){ if(c*((px||20)/100)>=minPx && c>=range/40){ step=c; break; } }
+  return Math.max(step, 100);
+}
+
+function renderAll(){
+  renderTabs();
+  applyTheme();
+  const d=cur();if(!d)return;
+  $("titleBox").value=d.title;
+  $("layoutSel").value=d.globalOptions.layout;
+  $("pxSel").value=String(d.globalOptions.pxPer100||120);
+  document.querySelectorAll("#showBox .check").forEach(c=>c.checked=!!d.globalOptions.show[c.dataset.k]);
+  renderLanePanel();renderCanvas();
+  try{ document.documentElement.setAttribute("data-rendered","ok"); }catch(e){}
+}
+
+/* ════════════ 文明面板 ════════════ */
+function renderLanePanel(){
+  const ul=$("lane");ul.innerHTML="";
+  (cur().lanes||[]).forEach((lane)=>{
+    const li=document.createElement("li");li.className="lane-item"+(lane.visible===false?" hidden-lane":"");li.dataset.id=lane.id;
+    li.innerHTML=`<div class="lane-head">
+        <input type="checkbox" class="check" ${lane.visible===false?"":"checked"} title="显示/隐藏整行">
+        <input type="color" value="${escapeAttr(lane.color||"#cbbf9e")}" title="行标签颜色">
+        <input type="text" value="${escapeAttr(lane.name)}" placeholder="文明名称">
+        <span class="icon-btn" title="删除整行" style="color:#c0392b;">✕</span></div>
+      <div class="lane-events"></div>
+      <div class="lane-btns">
+        <button class="add-ev">＋ 添加事件</button>
+        <button class="up">↑</button>
+        <button class="down">↓</button>
+      </div>`;
+    // 事件列表
+    const evs=li.querySelector(".lane-events");
+    (lane.events||[]).forEach(ev=>{
+      const e=document.createElement("div");e.className="ev";
+      e.innerHTML=`<span class="t">${escShow(ev.timeText)||"…"}</span><span class="icon-btn ed" title="编辑">✎</span><span class="icon-btn del" title="删除" style="color:#c0392b;">✕</span>`;
+      e.querySelector(".ed").onclick=()=>openEvent(lane.id,ev.id);
+      e.querySelector(".del").onclick=()=>{if(confirm("删除该事件？")){lane.events=lane.events.filter(x=>x.id!==ev.id);saveLocal();renderAll();}};
+      evs.appendChild(e);
+    });
+    li.querySelector(".add-ev").onclick=()=>openEvent(lane.id,null);
+    li.querySelector(".up").onclick=e=>{e.stopPropagation();moveLane(lane.id,-1);};
+    li.querySelector(".down").onclick=e=>{e.stopPropagation();moveLane(lane.id,1);};
+    const cb=li.querySelector(".lane-head input[type=checkbox]");
+    cb.onchange=()=>{lane.visible=cb.checked;saveLocal();renderAll();};
+    const colorIn=li.querySelector("input[type=color]");
+    colorIn.onchange=()=>{lane.color=colorIn.value;if(lane.color==="#cbbf9e")lane.color=null;saveLocal();renderAll();};
+    const nameIn=li.querySelector("input[type=text]");
+    nameIn.onchange=()=>{lane.name=nameIn.value;saveLocal();renderAll();};
+    const del=li.querySelector(".icon-btn");
+    del.onclick=()=>{if(confirm("删除“"+(lane.name||"未命名")+"”整行？")){cur().lanes=cur().lanes.filter(x=>x.id!==lane.id);saveLocal();renderAll();}};
+    // 排序箭头（占位按钮已由 up/down 处理）
+    ul.appendChild(li);
+  });
+}
+const escShow=s=>esc(s);
+function escapeAttr(s){return esc(s);}
+function moveLane(id,dir){const L=cur().lanes;const i=L.findIndex(l=>l.id===id);const j=i+dir;if(i<0||j<0||j>=L.length)return;const t=L[i];L[i]=L[j];L[j]=t;saveLocal();renderAll();}
+
+let lastNewLane=null;
+$("addLaneBtn").onclick=()=>{
+  const id=uid();cur().lanes.push({id,name:"新文明",visible:true,color:null,events:[]});
+  lastNewLane=id;saveLocal();renderAll();
+  // 自动打开文明面板，并高亮 + 滚动定位到新增行，便于立即重命名/添加事件
+  $("lanePanel").classList.add("open");
+  setTimeout(()=>{
+    const el=document.querySelector('.lane-item[data-id="'+id+'"]');
+    if(el){ el.classList.add("lane-new"); el.scrollIntoView({block:"center",behavior:"smooth"}); setTimeout(()=>el.classList.remove("lane-new"),2000); }
+  },80);
+};
+
+/* ════════════ 顶部控件 ════════════ */
+$("titleBox").addEventListener("input",e=>{cur().title=e.target.value;saveLocal();renderAll();});
+$("layoutSel").onchange=e=>{cur().globalOptions.layout=e.target.value;saveLocal();renderCanvas();};
+$("pxSel").onchange=e=>{cur().globalOptions.pxPer100=+e.target.value;saveLocal();renderCanvas();};
+document.querySelectorAll("#showBox .check").forEach(c=>c.onchange=()=>{cur().globalOptions.show[c.dataset.k]=c.checked;saveLocal();renderAll();});
+
+/* ════════════ 文档标签卡（多页面切换） ════════════ */
+function renderTabs(){
+  const box=$("docTabs");if(!box)return;box.innerHTML="";
+  (data.docs||[]).forEach(d=>{
+    const t=document.createElement("div");t.className="tl-tab"+(d.id===curDocId?" active":"");
+    t.title="点击切换；双击重命名";
+    t.onclick=()=>{curDocId=d.id;renderAll();};
+    t.ondblclick=()=>{if(window.G_READONLY)return;const n=prompt("重命名时间轴：",d.name);if(n&&n.trim()){d.name=n.trim();saveLocal();renderAll();}};
+    const nm=document.createElement("span");nm.className="tt-name";nm.textContent=d.name;t.appendChild(nm);
+    if(!window.G_READONLY){
+      const x=document.createElement("span");x.className="tt-x";x.textContent="✕";x.title="删除时间轴";
+      x.onclick=e=>{e.stopPropagation();deleteDoc(d);};
+      t.appendChild(x);
+    }
+    box.appendChild(t);
+  });
+  if(!window.G_READONLY){
+    const add=document.createElement("div");add.className="tl-tab tl-tab-add";add.textContent="＋ 新建";
+    add.title="新建时间轴";
+    add.onclick=()=>addDoc();
+    box.appendChild(add);
+  }
+}
+function addDoc(){
+  const n=prompt("新时间轴名称：","新时间轴");
+  const d=newDoc();if(n&&n.trim())d.name=n.trim();
+  data.docs.push(d);curDocId=d.id;saveLocal();renderAll();
+}
+function deleteDoc(d){
+  if(data.docs.length<=1){alert("至少保留一个时间轴。");return;}
+  if(!confirm('删除时间轴“'+d.name+'”？其下所有文明/事件将一并删除。'))return;
+  data.docs=data.docs.filter(x=>x.id!==d.id);
+  if(curDocId===d.id)curDocId=(data.docs[0]||{}).id||null;
+  saveLocal();renderAll();
+}
+
+function toggleDrop(id){document.querySelectorAll(".dropdown").forEach(d=>{if(d.id!==id)d.classList.remove("open");});$(id).classList.toggle("open");}
+$("laneBtn").onclick=()=>{$("lanePanel").classList.toggle("open");};
+$("themeBtn").onclick=()=>toggleDrop("themeBox");
+$("showBtn").onclick=()=>toggleDrop("showBox");
+$("dataBtn").onclick=()=>{const x=JSON.stringify(data,null,2);$("exportJson").value=x;$("dataModal").classList.add("open");switchDataTab(document.querySelector("#dataModal .tab button"),"export");};
+document.addEventListener("click",e=>{document.querySelectorAll(".dropdown").forEach(d=>{if(!d.contains(e.target)&&!["themeBtn","showBtn"].some(id=>document.getElementById(id).contains(e.target)))d.classList.remove("open");});});
+$("printBtn").onclick=()=>window.print();
+
+function closeMod(id){$(id).classList.remove("open");}
+// 阻止弹窗内点击关闭外框
+document.querySelectorAll(".modal-backdrop").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)closeMod(m.id);}));
+
+function switchDataTab(btn,name){
+  document.querySelectorAll("#dataModal .tab button").forEach(b=>b.classList.toggle("active",b===btn));
+  ["export","import","server"].forEach(n=>$(n+"Area").style.display=(n===name?"block":"none"));
+}
+function copyExport(){$("exportJson").select();document.execCommand("copy");alert("已复制到剪贴板");}
+function downloadJson(){
+  const blob=new Blob([$("exportJson").value],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=((cur()&&cur().title)||"timeline").replace(/[\\/:*?"<>|]/g,"_")+".json";a.click();
+}
+function importJson(){
+  const _txt=String($("importJson").value).trim();
+  if(!_txt){alert("导入框是空的：请先把要导入的 JSON 全文粘贴到上方文本框，再点“导入并覆盖”。");return;}
+  let o;try{o=JSON.parse(_txt);}catch(err){alert("JSON 解析失败："+err.message+"\n（请检查是否粘贴完整、括号是否闭合，或改用下方“下载/复制”重新导出）。");return;}
+  // 兼容旧单文档格式（有 lanes 无 docs）与新的多文档格式（docs 数组）
+  if(!o||(!Array.isArray(o.docs)&&!Array.isArray(o.lanes))){alert("缺少 docs（或多文档）数组，格式不正确。请参考 README.md。");return;}
+  o=normalize(o);
+  data=o;curDocId=data.docs[0]?data.docs[0].id:null;saveLocal();closeMod("dataModal");renderAll();alert("导入成功！");
+}
+async function saveToServer(){
+  try{const r=await fetch("/api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});const j=await r.json();$("serverMsg").textContent=j.ok?"已保存到服务器 data.json ✔":("失败："+(j.error||""));}catch(e){$("serverMsg").textContent="连接失败，请确认已通过 server.py 启动（端口0100）。";}
+}
+async function loadFromServer(){
+  try{const r=await fetch("/api/load");const j=await r.json();if(j.ok&&j.data&&j.data.docs){data=normalize(j.data);curDocId=data.docs[0]?data.docs[0].id:null;saveLocal();renderAll();$("serverMsg").textContent="已从服务器加载 ✔";}else{$("serverMsg").textContent="服务器上暂无有效数据。";}}catch(e){$("serverMsg").textContent="连接失败，请确认已通过 server.py 启动。";}
+}
+
+/* ════════════ 事件编辑 ════════════ */
+function openEvent(laneId,eventId){
+  $("ev_laneId").value=laneId;$("ev_eventId").value=eventId||"";
+  const lane=cur().lanes.find(l=>l.id===laneId);
+  const ev=eventId?lane.events.find(x=>x.id===eventId):null;
+  if(ev){
+    $("ev_timeText").value=ev.timeText||"";
+    $("ev_startYear").value=ev.startYear!=null?ev.startYear:"";
+    $("ev_startMonth").value=ev.startMonth!=null?ev.startMonth:"";
+    $("ev_startDay").value=ev.startDay!=null?ev.startDay:"";
+    $("ev_endYear").value=ev.endYear!=null&&ev.endYear!==""?ev.endYear:"";
+    $("ev_endMonth").value=ev.endMonth!=null?ev.endMonth:"";
+    $("ev_endDay").value=ev.endDay!=null?ev.endDay:"";
+    $("ev_eventText").value=ev.eventText||"";
+  }else{
+    $("ev_timeText").value="";$("ev_startYear").value="";$("ev_startMonth").value="";$("ev_startDay").value="";$("ev_endYear").value="";$("ev_endMonth").value="";$("ev_endDay").value="";$("ev_eventText").value="";
+  }
+  $("detailRows").innerHTML="";
+  const rows=ev?detailsToRows(ev.details):[];
+  if(!rows.length)rows.push({type:"text",value:""});
+  rows.forEach(r=>addDetailRow(r.type,r.value));
+  $("evTitle").textContent=ev?"编辑事件 · "+lane.name:"添加事件 · "+lane.name;
+  $("ev_del").style.display=ev?"inline-block":"none";
+  $("eventModal").classList.add("open");
+}
+const VALID_TYPES=["text","place","person","dot"];
+function addDetailRow(type,value){
+  type=VALID_TYPES.includes(type)?type:"text";
+  const row=document.createElement("div");row.className="marker-row";
+  const sel=document.createElement("select");
+  [["text","普通文字"],["place","地点【】"],["person","人名（）"],["dot","分点记忆"]].forEach(([v,l])=>{
+    const o=document.createElement("option");o.value=v;o.textContent=l;if(v===type)o.selected=true;sel.appendChild(o);
+  });
+  const inp=document.createElement("input");inp.type="text";inp.value=value==null?"":value;
+  inp.placeholder=type==="dot"?"多个要点用顿号、分隔":"内容";
+  const rm=document.createElement("button");rm.className="rm";rm.textContent="✕";rm.title="删除此条";rm.onclick=()=>row.remove();
+  row.appendChild(sel);row.appendChild(inp);row.appendChild(rm);
+  $("detailRows").appendChild(row);
+}
+/* details 字符串(可含【】（）下划线组合) → 逐条类型化 rows */
+function detailsToRows(details){
+  const rows=[];let pendingDot=null;
+  const flush=()=>{ if(pendingDot){rows.push({type:"dot",value:pendingDot.join("、")});pendingDot=null;} };
+  for(const d of (details||[])){
+    const line=String(d);const re=/【[^】]*】|（[^）]*）|_[^_]*_/g;let last=0,m;
+    while((m=re.exec(line))){
+      if(m.index>last){const t=line.slice(last,m.index);if(t&&t.trim()){flush();rows.push({type:"text",value:t});}}
+      const c=m[0][0];
+      if(c==="【"){flush();rows.push({type:"place",value:m[0].slice(1,-1)});}
+      else if(c==="（"){flush();rows.push({type:"person",value:m[0].slice(1,-1)});}
+      else { if(pendingDot)pendingDot.push(m[0].slice(1,-1)); else pendingDot=[m[0].slice(1,-1)]; }
+      last=re.lastIndex;
+    }
+    if(last<line.length){const t=line.slice(last);if(t&&t.trim()){flush();rows.push({type:"text",value:t});}}
+    flush();
+  }
+  return rows;
+}
+/* rows → details 字符串数组 */
+function detailRowsToDetails(){
+  return [...$("detailRows").children].map(row=>{
+    const type=row.querySelector("select").value, val=row.querySelector("input").value.trim();
+    if(!val)return null;
+    if(type==="place")return "【"+val+"】";
+    if(type==="person")return "（"+val+"）";
+    if(type==="dot")return val.split(/[、,，]/).map(x=>x.trim()).filter(Boolean).map(x=>"_"+x+"_").join("、");
+    return val;
+  }).filter(Boolean);
+}
+function parseTimeFromText(){
+  const r=parseEra($("ev_timeText").value);
+  if(!r){alert("无法从该文字识别时间。请直接手填年份（可加月/日），或使用：公元前N世纪 / N世纪 / 公元前N年M月D日 / N年M月D日。");return;}
+  $("ev_startYear").value=r.start;
+  $("ev_startMonth").value=r.sm>1?r.sm:"";
+  $("ev_startDay").value=r.sd>1?r.sd:"";
+  $("ev_endYear").value=r.end!==r.start?r.end:"";
+  $("ev_endMonth").value=(r.end!==r.start&&r.em>1)?r.em:"";
+  $("ev_endDay").value=(r.end!==r.start&&r.ed>1)?r.ed:"";
+}
+function saveEvent(){
+  const laneId=$("ev_laneId").value,eventId=$("ev_eventId").value;
+  const lane=cur().lanes.find(l=>l.id===laneId);if(!lane){alert("文明不存在");return;}
+  const startY=parseFloat($("ev_startYear").value);
+  if(isNaN(startY)){alert("请填写起始年份（公元前用负数，例如 -3100）。");return;}
+  const endY=$("ev_endYear").value===""?startY:parseFloat($("ev_endYear").value);
+  if(isNaN(endY)){alert("结束年份无效");return;}
+  const details=detailRowsToDetails();
+  const ev={id:eventId||uid(),timeText:$("ev_timeText").value.trim(),startYear:startY,endYear:endY,eventText:$("ev_eventText").value.trim(),details};
+  const sm=parseInt($("ev_startMonth").value,10),sd=parseInt($("ev_startDay").value,10);
+  const em=parseInt($("ev_endMonth").value,10),ed=parseInt($("ev_endDay").value,10);
+  if(sm>=1&&sm<=12)ev.startMonth=sm; if(sd>=1&&sd<=31)ev.startDay=sd;
+  if(em>=1&&em<=12)ev.endMonth=em; if(ed>=1&&ed<=31)ev.endDay=ed;
+  if(eventId){const i=lane.events.findIndex(x=>x.id===eventId);lane.events[i]=ev;}else{lane.events.push(ev);}
+  saveLocal();closeMod("eventModal");renderAll();
+}
+function deleteCurrentEvent(){const laneId=$("ev_laneId").value,eventId=$("ev_eventId").value;const lane=cur().lanes.find(l=>l.id===laneId);lane.events=lane.events.filter(x=>x.id!==eventId);saveLocal();closeMod("eventModal");renderAll();}
+
+/* ════════════ 启动 ════════════ */
+function boot(){
+  if(window.G_OFFLINE){
+    // 离线副本：直接使用内嵌数据对象，不连服务器、不碰 localStorage
+    try{ data=normalize(window.__OFFLINE_DATA); }catch(e){}
+  } else {
+    // 以服务器 data.json 为唯一数据源：不读、不写浏览器 localStorage。
+    // 这样无论用 localhost / 127.0.0.1 / 局域网IP / 平板访问，看到的都是同一份最新数据，
+    // 彻底避免“某访问方式因本地旧数据而白屏”。
+    data=normalize(clone(DEFAULT_DATA));
+  }
+  curDocId=data.docs[0]?data.docs[0].id:null;
+  applyReadonlyUI();
+  function safeRender(){ try{ renderAll(); }catch(err){ console.error("渲染出错:", err); } }
+  safeRender();
+  if(!window.G_OFFLINE){
+    fetch("/api/load").then(r=>r.json()).then(j=>{
+      if(j&&j.ok&&j.data&&j.data.docs){ data=normalize(j.data); curDocId=data.docs[0]?data.docs[0].id:null; safeRender(); }
+    }).catch(()=>{});
+    loadGlobalTheme();
+  }
+  wireOffline();
+}
+boot();
+
+/* ---- 只读模式：隐藏/禁用内容编辑入口 ---- */
+function applyReadonlyUI(){
+  if(!window.G_READONLY)return;
+  $("laneBtn").style.display="none";          // 文明/事件编辑入口
+  $("titleBox").disabled=true;                // 标题不可改
+  // 数据弹窗：只保留“导出 JSON”，隐藏“导入 / 保存服务器”
+  document.querySelectorAll("#dataModal .tab button").forEach(b=>{ const o=b.getAttribute("onclick")||""; if(o.includes("import")||o.includes("server")) b.style.display="none"; });
+  document.querySelectorAll("#importArea,#serverArea").forEach(a=>a.style.display="none");
+}
+
+/* ---- 保存离线网页：把当前数据内嵌进一份自包含 HTML 供离线打开 ---- */
+function wireOffline(){
+  const b=$("offlineBtn"); if(!b)return;
+  b.onclick= async ()=>{
+    if(window.G_OFFLINE){ alert("当前已是离线副本，直接保存/使用本文件即可，无需再次导出。"); return; }
+    // 空数据保护：当前页面没有内容时，导出的离线网页必然是空的，直接提醒并阻止下载
+    const total=(cur().lanes||[]).reduce((n,l)=>n+(l.events?l.events.length:0),0);
+    if(total===0){ alert("当前页面还没有任何文明/事件（空框架），导出的离线网页会一样是空的。\n请先在编辑端口 http://127.0.0.1:100 添加内容后，再导出离线网页。"); return; }
+    let src;
+    try{ src=await fetch(location.href).then(r=>r.text()); }
+    catch(e){ alert("读取页面源码失败，无法导出离线网页。"); return; }
+    const safe=JSON.stringify(data).replace(/</g,"\\u003c");
+    const inject='<script>window.__OFFLINE_DATA='+safe+';<\/'+'script>';
+    // 把内嵌数据注入到 <head> 里（确保在任何功能脚本之前定义），更稳
+    const out=(src.indexOf("</head>")>-1) ? src.replace("</head>", inject+"</head>") : src.replace(/<script>/i, inject+"<script>");
+    const blob=new Blob([out],{type:"text/html"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    a.download=((cur()&&cur().title)||"timeline").replace(/[\\/:*?"<>|]/g,"_")+".offline.html";a.click();
+    alert("已开始下载离线网页（含 "+data.docs.length+" 个时间轴 / "+total+" 个事件）。双击该 .offline.html 即可离线查看全部内容。");
+  };
+}
+</script>
+</body>
+</html>

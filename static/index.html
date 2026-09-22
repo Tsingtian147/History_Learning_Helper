@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>主页 · 历史学习</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%F0%9F%8F%A0%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+/* ════════════ 主页主题（全局统一：与时间轴/问答页共用同一套 4 主题，切换存于服务器 ui_config.json） ════════════ */
+:root{
+  --home-bg:#f5efe0; --home-text:#3a3228; --home-muted:#8a7f6c; --home-accent:#8a6d3b;
+  --home-btn-bg:#fffdf6; --home-btn-tx:#8a6d3b;
+}
+body.theme-ocean{--home-bg:#ddeef7;--home-text:#1f3a4d;--home-muted:#76a0b8;--home-accent:#2b6cb0;--home-btn-bg:#f4fbfe;--home-btn-tx:#2b6cb0;}
+body.theme-forest{--home-bg:#e4f0e3;--home-text:#23402a;--home-muted:#7fa37c;--home-accent:#2f7d4f;--home-btn-bg:#f6fbf5;--home-btn-tx:#2f7d4f;}
+body.theme-mono{--home-bg:#fff;--home-text:#000;--home-muted:#444;--home-accent:#000;--home-btn-bg:#fff;--home-btn-tx:#000;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{margin:0;background:var(--home-bg);color:var(--home-text);font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;padding-left:64px;transition:background .2s ease;}
+.home-main{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:18px;text-align:center;padding:20px;}
+.home-main h1{font-size:28px;color:var(--home-accent);letter-spacing:2px;}
+.home-main p{color:var(--home-muted);font-size:14px;line-height:1.8;}
+.home-links{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.home-links a{text-decoration:none;padding:13px 26px;border-radius:10px;font-size:15px;border:1.5px solid var(--home-accent);color:var(--home-btn-tx);background:var(--home-btn-bg);transition:all .18s;}
+.home-links a:hover{background:var(--home-accent);color:#fff;}
+
+/* 配色下拉（th- 前缀，避免与页面其它样式冲突） */
+#thBtn{position:fixed;top:16px;right:16px;z-index:300;font-size:13px;padding:7px 12px;border:1px solid var(--home-accent);border-radius:8px;background:var(--home-btn-bg);color:var(--home-accent);cursor:pointer;}
+#thBtn:hover{filter:brightness(.95);}
+.th-dropdown{display:none;position:fixed;top:56px;right:16px;min-width:250px;background:var(--home-btn-bg);
+  border:1px solid var(--home-accent);border-radius:8px;padding:12px;box-shadow:0 8px 22px rgba(0,0,0,.16);z-index:300;}
+.th-dropdown.open{display:block;}
+.th-dropdown h4{margin:0 0 8px;font-size:13px;color:var(--home-muted);border-bottom:1px solid var(--home-accent);padding-bottom:6px;}
+.th-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.th-item{border:2px solid var(--home-accent);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px;color:var(--home-text);background:var(--home-btn-bg);}
+.th-item.active{border-color:var(--home-accent);outline:2px solid var(--home-accent);}
+.th-swatch{width:26px;height:18px;border:1px solid #999;border-radius:3px;flex:none;}
+</style>
+<style>
+/* ════════════ 侧边栏（参考 sidebar.html；类名统一加 sb- 前缀，避免与页面样式冲突导致白屏） ════════════ */
+:root{--sb-w:64px;--sb-w-open:220px;--sb-bg:#8a6d3b;}
+body.theme-ocean{--sb-bg:#2b6cb0;}
+body.theme-forest{--sb-bg:#2f7d4f;}
+body.theme-mono{--sb-bg:#000;}
+.sb-sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:var(--sb-bg);padding:16px 0;overflow:hidden;overflow-x:hidden;z-index:1000;box-shadow:1px 0 0 rgba(0,0,0,.06);user-select:none;-webkit-tap-highlight-color:transparent;transition:width .26s cubic-bezier(.4,0,.2,1);}
+.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w-open);}
+.sb-item{display:flex;align-items:center;height:56px;margin:2px 8px;padding:0 12px;border-radius:8px;color:#fff;text-decoration:none;white-space:nowrap;transition:background .18s ease;}
+.sb-item:hover,.sb-item:focus-visible{background:rgba(255,255,255,.14);outline:none;}
+.sb-item.sb-active{background:rgba(255,255,255,.24);}
+.sb-ico{flex:0 0 24px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+.sb-ico svg{width:24px;height:24px;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sb-txt{margin-left:16px;font-size:16px;line-height:1;opacity:0;transform:translateX(-6px);transition:opacity .18s ease,transform .18s ease;}
+.sb-sidebar:hover .sb-txt,.sb-sidebar:focus-within .sb-txt{opacity:1;transform:translateX(0);}
+.sb-sidebar:hover .sb-item .sb-txt{transition-delay:.06s;}
+body{padding-left:var(--sb-w);}
+@media (hover:none) and (min-width:721px){.sb-sidebar{width:var(--sb-w-open);}.sb-txt{opacity:1;transform:none;}}
+@media (max-width:720px){:root{--sb-w:56px;--sb-w-open:56px;}.sb-txt{display:none;}.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w);}}
+@media print{.sb-sidebar{display:none!important;}body{padding-left:0!important;}#thBtn,.th-dropdown{display:none!important;}}
+</style>
+</head>
+<body class="theme-parchment">
+
+<!-- ════════════ 侧边栏导航 ════════════ -->
+<aside class="sb-sidebar" aria-label="主导航">
+  <nav>
+    <a class="sb-item" href="/" title="主页"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M3.5 10.4 12 3.6l8.5 6.8"/><path d="M5.8 9.6V20h12.4V9.6"/><path d="M9.9 20v-5.2h4.2V20"/></svg></span><span class="sb-txt">主页</span></a>
+    <a class="sb-item" href="/timeline.html" title="时间轴"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12"/><path d="M12 12l3.6 2.4"/></svg></span><span class="sb-txt">时间轴</span></a>
+    <a class="sb-item" href="/qa.html" title="问答练习"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M9 18.2 4.2 20.4l1.1-4.3A6.9 6.9 0 1 1 9 18.2Z"/><path d="M12 8.2v1.3"/><path d="M12 12.4h.01"/></svg></span><span class="sb-txt">问答练习</span></a>
+    <a class="sb-item" href="/quickref.html" title="速查"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="10.6" cy="10.6" r="6.4"/><path d="M15.4 15.4 20 20"/><path d="M8 10.6h5.2"/></svg></span><span class="sb-txt">速查</span></a>
+    <a class="sb-item" href="/settings.html" title="设置"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06A2 2 0 1 1 7.03 4.24l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.26.58.84.93 1.51 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg></span><span class="sb-txt">设置</span></a>
+  </nav>
+</aside>
+<script>
+(function(){var p=(location.pathname.split("/").pop()||"index.html");document.querySelectorAll(".sb-item").forEach(function(a){var h=(a.getAttribute("href")||"").split("/").pop();if(h===p)a.classList.add("sb-active");});})();
+</script>
+<!-- ════════════ /侧边栏 ════════════ -->
+
+<!-- 配色按钮 + 下拉（全局统一：切换后存于服务器 ui_config.json，所有页面保持一致） -->
+<button id="thBtn">🎨 配色</button>
+<div id="thBox" class="th-dropdown">
+  <h4>配色方案（全局统一）</h4>
+  <div class="th-grid">
+    <div class="th-item active" data-t="parchment" onclick="pickTheme('parchment')"><span class="th-swatch" style="background:#f5efe0"></span>羊皮纸</div>
+    <div class="th-item" data-t="ocean" onclick="pickTheme('ocean')"><span class="th-swatch" style="background:#ddeef7"></span>海洋蓝</div>
+    <div class="th-item" data-t="forest" onclick="pickTheme('forest')"><span class="th-swatch" style="background:#e4f0e3"></span>自然绿</div>
+    <div class="th-item" data-t="mono" onclick="pickTheme('mono')"><span class="th-swatch" style="background:#fff"></span>打印黑白</div>
+  </div>
+</div>
+
+<div class="home-main">
+  <h1>🏠 主页</h1>
+  <p>此页为预留空页面，功能陆续建设中。<br>请从左侧侧边栏选择功能开始学习。</p>
+  <div class="home-links">
+    <a href="/timeline.html">📜 时间轴</a>
+    <a href="/qa.html">💬 问答练习</a>
+    <a href="/quickref.html">🔍 速查</a>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ════════════ 主题（全局统一：主题存于服务器 ui_config.json，与时间轴/问答页共享） ════════════ */
+const THEME_ALT={"parchment":"theme-parchment","ocean":"theme-ocean","forest":"theme-forest","mono":"theme-mono"};
+let G_THEME="parchment";
+function applyThemeUI(){
+  document.body.className=THEME_ALT[G_THEME]||"theme-parchment";
+  document.querySelectorAll("#thBox .th-item").forEach(t=>t.classList.toggle("active",t.dataset.t===G_THEME));
+}
+function pickTheme(t){
+  if(!THEME_ALT[t]) t="parchment";
+  G_THEME=t; applyThemeUI();
+  fetch("/api/ui/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({version:1,theme:t})}).catch(()=>{});
+}
+function loadGlobalTheme(){
+  fetch("/api/ui/load").then(r=>r.json()).then(j=>{
+    if(j&&j.ok&&j.data&&THEME_ALT[j.data.theme]){ G_THEME=j.data.theme; applyThemeUI(); }
+  }).catch(()=>{});
+}
+document.getElementById("thBtn").onclick=(e)=>{ e.stopPropagation(); document.getElementById("thBox").classList.toggle("open"); };
+document.addEventListener("click",e=>{ const b=document.getElementById("thBox"); if(b&&!b.contains(e.target)&&e.target.id!=="thBtn")b.classList.remove("open"); });
+loadGlobalTheme();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>问答练习 · 历史学习</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%F0%9F%92%AC%3C/text%3E%3C/svg%3E">
+<style>
+/* ════════════ 问答页基础样式 ════════════ */
+/* 配色主题（全局统一：与时间轴/主页共用同一套 4 主题，切换存于服务器 ui_config.json） */
+:root{
+  --qa-bg:#f5efe0; --qa-panel:#fffdf6; --qa-border:#cbbf9e; --qa-text:#3a3228;
+  --qa-muted:#8a7f6c; --qa-accent:#8a6d3b; --qa-star:#e6a817; --qa-ans-bg:#fdf6e3; --qa-red:#c0392b;
+  --qa-soft:#eee4cd; --qa-unit-bg:#eee2c5; --qa-ans-b:#b45309; --qa-ans-h:#8a6d3b; --qa-star-off:#d9cbaa;
+}
+body.theme-ocean{--qa-bg:#ddeef7;--qa-panel:#f4fbfe;--qa-border:#9ec3d6;--qa-text:#1f3a4d;--qa-muted:#76a0b8;
+  --qa-accent:#2b6cb0;--qa-star:#e6a817;--qa-ans-bg:#eaf6fd;--qa-red:#c0392b;--qa-soft:#dcebf4;--qa-unit-bg:#d8e9f5;
+  --qa-ans-b:#b45309;--qa-ans-h:#17517e;--qa-star-off:#b8cbd8;}
+body.theme-forest{--qa-bg:#e4f0e3;--qa-panel:#f6fbf5;--qa-border:#9fc49a;--qa-text:#23402a;--qa-muted:#7fa37c;
+  --qa-accent:#2f7d4f;--qa-star:#e6a817;--qa-ans-bg:#eef7ec;--qa-red:#c0392b;--qa-soft:#dcead9;--qa-unit-bg:#d9e8d6;
+  --qa-ans-b:#b45309;--qa-ans-h:#2f5632;--qa-star-off:#b8ccb4;}
+body.theme-mono{--qa-bg:#fff;--qa-panel:#fff;--qa-border:#333;--qa-text:#000;--qa-muted:#444;
+  --qa-accent:#000;--qa-star:#000;--qa-ans-bg:#fff;--qa-red:#000;--qa-soft:#eee;--qa-unit-bg:#eee;
+  --qa-ans-b:#000;--qa-ans-h:#000;--qa-star-off:#999;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--qa-bg);color:var(--qa-text);font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;padding-left:64px;}
+
+/* 顶部：文档标签卡 + 工具行 */
+#topbar{position:sticky;top:0;z-index:60;background:var(--qa-panel);border-bottom:2px solid var(--qa-border);box-shadow:0 2px 6px rgba(0,0,0,.06);}
+#docTabs{display:flex;align-items:center;gap:6px;padding:8px 12px;overflow-x:auto;white-space:nowrap;scrollbar-width:thin;}
+.doc-tab{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:13px;border:1px solid var(--qa-border);border-radius:8px;background:var(--qa-panel);cursor:pointer;color:var(--qa-text);flex:none;max-width:250px;user-select:none;}
+.doc-tab:hover{filter:brightness(.96);}
+.doc-tab.active{background:var(--qa-accent);color:#fff;border-color:var(--qa-accent);}
+.doc-tab .dt-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doc-tab .dt-x{margin-left:2px;opacity:.75;font-size:12px;padding:0 2px;border-radius:4px;}
+.doc-tab .dt-x:hover{opacity:1;background:rgba(0,0,0,.12);}
+.doc-tab-add{border-style:dashed;color:var(--qa-muted);}
+#ctrlRow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--qa-border);}
+#ctrlRow button,#ctrlRow select{font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--qa-border);border-radius:6px;background:var(--qa-panel);color:var(--qa-text);cursor:pointer;}
+#ctrlRow button:hover{filter:brightness(.96);}
+#ctrlRow .sep{width:1px;height:22px;background:var(--qa-border);}
+#qaHint{margin-left:auto;font-size:12px;color:var(--qa-muted);white-space:nowrap;}
+
+/* 配色下拉（th- 前缀，避免与页面其它样式冲突） */
+.th-dropdown{display:none;position:fixed;top:96px;right:14px;min-width:250px;background:var(--qa-panel);
+  border:1px solid var(--qa-border);border-radius:8px;padding:12px;box-shadow:0 8px 22px rgba(0,0,0,.16);z-index:120;}
+.th-dropdown.open{display:block;}
+.th-dropdown h4{margin:0 0 8px;font-size:13px;color:var(--qa-muted);border-bottom:1px solid var(--qa-border);padding-bottom:6px;}
+.th-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.th-item{border:2px solid var(--qa-border);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px;color:var(--qa-text);background:var(--qa-panel);}
+.th-item.active{border-color:var(--qa-accent);}
+.th-swatch{width:26px;height:18px;border:1px solid #999;border-radius:3px;flex:none;}
+
+/* 列表区 */
+#main{max-width:920px;margin:14px auto;padding:0 12px 40px;}
+.unit-head{font-size:15px;font-weight:700;color:var(--qa-accent);margin:20px 4px 8px;padding:9px 12px;background:var(--qa-unit-bg);border-left:4px solid var(--qa-accent);border-radius:6px;word-break:break-all;}
+.qa-card{background:var(--qa-panel);border:1px solid var(--qa-border);border-radius:10px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.qa-head{display:flex;align-items:center;gap:10px;padding:12px 14px;}
+.qa-num{flex:none;width:26px;height:26px;border-radius:50%;background:var(--qa-accent);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.qa-title{flex:1;font-size:15px;font-weight:600;line-height:1.5;word-break:break-all;}
+.qa-doc-badge{flex:none;font-size:11px;color:var(--qa-muted);background:var(--qa-soft);padding:2px 8px;border-radius:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.star-btn{flex:none;width:30px;height:30px;border:none;background:none;font-size:22px;line-height:1;cursor:pointer;color:var(--qa-star-off);}
+.star-btn:hover{color:var(--qa-star);}
+.star-btn.on{color:var(--qa-star);}
+.qa-ans{display:none;border-top:1px dashed var(--qa-border);padding:12px 16px;background:var(--qa-ans-bg);border-radius:0 0 10px 10px;}
+.qa-ans.show{display:block;}
+.qa-foot{display:flex;align-items:center;gap:8px;padding:8px 14px 12px;}
+.toggle-ans{padding:6px 16px;font-size:13px;border:1px solid var(--qa-accent);border-radius:6px;background:var(--qa-panel);color:var(--qa-accent);cursor:pointer;}
+.toggle-ans:hover{filter:brightness(.96);}
+.toggle-ans.showing{background:var(--qa-accent);color:#fff;}
+
+/* 答案 Markdown 渲染 */
+.ans-p{margin:6px 0;font-size:14px;line-height:1.9;word-wrap:break-word;}
+.ans-p b,.ans-li b{color:var(--qa-ans-b);}
+.ans-h{margin:12px 0 6px;font-weight:700;color:var(--qa-ans-h);line-height:1.6;}
+.ans-h.h1{font-size:17px;}.ans-h.h2{font-size:16px;}.ans-h.h3{font-size:15px;}.ans-h.h4{font-size:14px;}.ans-h.h5{font-size:13px;}.ans-h.h6{font-size:13px;}
+.ans-list{margin:6px 0;}
+.ans-li{font-size:14px;line-height:1.9;padding-left:2.2em;text-indent:-2.2em;word-wrap:break-word;margin:3px 0;}
+.ans-li-no{display:inline-block;min-width:2em;color:var(--qa-muted);font-weight:600;}
+.ans-table{margin:8px 0;overflow-x:auto;}
+.ans-table table{border-collapse:collapse;width:100%;font-size:13px;}
+.ans-table th,.ans-table td{border:1px solid var(--qa-border);padding:6px 10px;text-align:left;line-height:1.7;word-break:break-all;}
+.ans-table th{background:var(--qa-soft);font-weight:600;}
+
+/* 分页 */
+#pager{display:flex;align-items:center;justify-content:center;gap:10px;margin:20px 0;flex-wrap:wrap;}
+#pager button{padding:6px 14px;font-size:13px;border:1px solid var(--qa-border);border-radius:6px;background:var(--qa-panel);cursor:pointer;}
+#pager button:disabled{opacity:.4;cursor:default;}
+#pager select{font-size:13px;padding:5px 8px;border:1px solid var(--qa-border);border-radius:6px;background:var(--qa-panel);cursor:pointer;}
+.pg-info{font-size:13px;color:var(--qa-muted);}
+.empty-tip{text-align:center;color:var(--qa-muted);padding:60px 0;font-size:14px;line-height:2;}
+
+/* 弹窗 */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,15,15,.5);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-backdrop.open{display:flex;}
+.modal{width:640px;max-width:94vw;max-height:90vh;overflow:auto;background:var(--qa-panel);border:1px solid var(--qa-border);border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.modal h3{margin-bottom:12px;font-size:16px;border-bottom:2px solid var(--qa-border);padding-bottom:8px;}
+.form-row{margin-bottom:10px;}
+.form-row label{display:block;font-size:12px;color:var(--qa-muted);margin-bottom:4px;}
+.form-row textarea,.form-row input[type=text]{width:100%;padding:7px 9px;font-size:13px;font-family:inherit;border:1px solid var(--qa-border);border-radius:6px;color:var(--qa-text);background:var(--qa-panel);}
+.form-row textarea{resize:vertical;min-height:160px;font-family:Consolas,"Courier New",monospace;font-size:12px;line-height:1.6;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;align-items:center;}
+.modal-actions button{padding:7px 14px;font-size:13px;border-radius:6px;border:1px solid var(--qa-border);cursor:pointer;background:var(--qa-panel);}
+.modal-actions .primary{background:var(--qa-accent);color:#fff;border-color:var(--qa-accent);}
+.modal-actions .danger{background:var(--qa-red);color:#fff;border-color:var(--qa-red);}
+.modal .tab{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.modal .tab button{padding:5px 10px;font-size:13px;border:1px solid var(--qa-border);border-radius:6px;background:var(--qa-panel);cursor:pointer;}
+.modal .tab button.active{background:var(--qa-accent);color:#fff;border-color:var(--qa-accent);}
+#exportJson,#importJson{width:100%;height:200px;font-family:Consolas,monospace;font-size:12px;border:1px solid var(--qa-border);border-radius:6px;padding:8px;background:var(--qa-panel);}
+.hint{font-size:11px;color:var(--qa-muted);margin-top:4px;line-height:1.7;word-break:break-all;}
+code{background:var(--qa-soft);padding:1px 5px;border-radius:4px;font-size:11px;}
+
+/* 薄弱点列表行 */
+.wl-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--qa-border);border-radius:8px;margin:6px 0;flex-wrap:wrap;}
+.wl-row .wl-name{flex:1;min-width:120px;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wl-row .wl-count{font-size:12px;color:var(--qa-muted);}
+.wl-row button{font-size:12px;padding:4px 9px;border:1px solid var(--qa-border);border-radius:5px;background:var(--qa-panel);cursor:pointer;}
+.wl-row .wl-cur{border-color:var(--qa-star);color:var(--qa-star);font-weight:600;}
+.wl-row .wl-del{color:var(--qa-red);border-color:var(--qa-red);}
+
+/* 全局脚本错误提示（左下角红条） */
+#errBox{position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:var(--qa-red);color:#fff;padding:10px 12px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;box-shadow:0 2px 8px rgba(0,0,0,.4);display:none;}
+
+@media (max-width:720px){ body{padding-left:56px;} #qaHint{display:none;} .qa-title{font-size:14px;} }
+@media print{ .sb-sidebar,#docTabs,#ctrlRow,#pager,.star-btn,.qa-foot,.doc-tab-add,#thBox{display:none!important;} body{padding-left:0!important;background:#fff!important;} .qa-ans{display:block!important;} }
+</style>
+<style>
+/* ════════════ 侧边栏（参考 sidebar.html；类名统一加 sb- 前缀，避免与页面样式冲突导致白屏） ════════════ */
+:root{--sb-w:64px;--sb-w-open:220px;--sb-bg:#8a6d3b;}
+body.theme-ocean{--sb-bg:#2b6cb0;}
+body.theme-forest{--sb-bg:#2f7d4f;}
+body.theme-mono{--sb-bg:#000;}
+.sb-sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:var(--sb-bg);padding:16px 0;overflow:hidden;overflow-x:hidden;z-index:1000;box-shadow:1px 0 0 rgba(0,0,0,.06);user-select:none;-webkit-tap-highlight-color:transparent;transition:width .26s cubic-bezier(.4,0,.2,1);}
+.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w-open);}
+.sb-item{display:flex;align-items:center;height:56px;margin:2px 8px;padding:0 12px;border-radius:8px;color:#fff;text-decoration:none;white-space:nowrap;transition:background .18s ease;}
+.sb-item:hover,.sb-item:focus-visible{background:rgba(255,255,255,.14);outline:none;}
+.sb-item.sb-active{background:rgba(255,255,255,.24);}
+.sb-ico{flex:0 0 24px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;}
+.sb-ico svg{width:24px;height:24px;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sb-txt{margin-left:16px;font-size:16px;line-height:1;opacity:0;transform:translateX(-6px);transition:opacity .18s ease,transform .18s ease;}
+.sb-sidebar:hover .sb-txt,.sb-sidebar:focus-within .sb-txt{opacity:1;transform:translateX(0);}
+.sb-sidebar:hover .sb-item .sb-txt{transition-delay:.06s;}
+body{padding-left:var(--sb-w);}
+@media (hover:none) and (min-width:721px){.sb-sidebar{width:var(--sb-w-open);}.sb-txt{opacity:1;transform:none;}}
+@media (max-width:720px){:root{--sb-w:56px;--sb-w-open:56px;}.sb-txt{display:none;}.sb-sidebar:hover,.sb-sidebar:focus-within{width:var(--sb-w);}}
+@media print{.sb-sidebar{display:none!important;}body{padding-left:0!important;}}
+</style>
+</head>
+<body class="theme-parchment">
+
+<!-- ════════════ 侧边栏导航 ════════════ -->
+<aside class="sb-sidebar" aria-label="主导航">
+  <nav>
+    <a class="sb-item" href="/" title="主页"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M3.5 10.4 12 3.6l8.5 6.8"/><path d="M5.8 9.6V20h12.4V9.6"/><path d="M9.9 20v-5.2h4.2V20"/></svg></span><span class="sb-txt">主页</span></a>
+    <a class="sb-item" href="/timeline.html" title="时间轴"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12"/><path d="M12 12l3.6 2.4"/></svg></span><span class="sb-txt">时间轴</span></a>
+    <a class="sb-item" href="/qa.html" title="问答练习"><span class="sb-ico"><svg viewBox="0 0 24 24"><path d="M9 18.2 4.2 20.4l1.1-4.3A6.9 6.9 0 1 1 9 18.2Z"/><path d="M12 8.2v1.3"/><path d="M12 12.4h.01"/></svg></span><span class="sb-txt">问答练习</span></a>
+    <a class="sb-item" href="/quickref.html" title="速查"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="10.6" cy="10.6" r="6.4"/><path d="M15.4 15.4 20 20"/><path d="M8 10.6h5.2"/></svg></span><span class="sb-txt">速查</span></a>
+    <a class="sb-item" href="/settings.html" title="设置"><span class="sb-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06A2 2 0 1 1 7.03 4.24l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.26.58.84.93 1.51 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg></span><span class="sb-txt">设置</span></a>
+  </nav>
+</aside>
+<script>
+(function(){var p=(location.pathname.split("/").pop()||"index.html");document.querySelectorAll(".sb-item").forEach(function(a){var h=(a.getAttribute("href")||"").split("/").pop();if(h===p)a.classList.add("sb-active");});})();
+</script>
+<!-- ════════════ /侧边栏 ════════════ -->
+
+<div id="topbar">
+  <div id="docTabs"></div>
+  <div id="ctrlRow">
+    <button id="showAllBtn" title="批量显示当前视图内所有题目的答案">✅ 全部显示答案</button>
+    <button id="hideAllBtn" title="批量隐藏所有题目的答案">🙈 全部隐藏答案</button>
+    <span class="sep"></span>
+    <select id="weakSel" title="选择薄弱点列表后，可只查看列表内题目，或在全部题目中浏览并星标收集（跨文档）"></select>
+    <select id="weakScopeSel" title="选择列表后的显示范围：仅列表内 / 全部题目" style="display:none"></select>
+    <button id="weakBtn">⭐ 薄弱点</button>
+    <span class="sep"></span>
+    <button id="importBtn">📥 导入题目(md)</button>
+    <button id="dataBtn">⚙ 数据</button>
+    <button id="thBtn">🎨 配色</button>
+    <button id="offlineBtn" title="下载一个包含当前全部问答内容的离线网页" style="background:#8a5a3b;color:#fff;border-color:#8a5a3b;">💾 保存离线</button>
+    <span id="qaHint"></span>
+  </div>
+</div>
+
+<!-- 配色下拉（全局统一：切换后存于服务器 ui_config.json，所有页面保持一致） -->
+<div id="thBox" class="th-dropdown">
+  <h4>配色方案（全局统一）</h4>
+  <div class="th-grid">
+    <div class="th-item active" data-t="parchment" onclick="pickTheme('parchment')"><span class="th-swatch" style="background:#f5efe0"></span>羊皮纸</div>
+    <div class="th-item" data-t="ocean" onclick="pickTheme('ocean')"><span class="th-swatch" style="background:#ddeef7"></span>海洋蓝</div>
+    <div class="th-item" data-t="forest" onclick="pickTheme('forest')"><span class="th-swatch" style="background:#e4f0e3"></span>自然绿</div>
+    <div class="th-item" data-t="mono" onclick="pickTheme('mono')"><span class="th-swatch" style="background:#fff"></span>打印黑白</div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="qaList"></div>
+  <div id="pager"></div>
+</div>
+
+<!-- 导入 md 弹窗 -->
+<div id="importModal" class="modal-backdrop">
+  <div class="modal">
+    <h3>📥 导入题目文档（Markdown）</h3>
+    <div class="form-row">
+      <label>文档名称（留空则自动取文档第一个「# 单元」标题）</label>
+      <input type="text" id="importName" placeholder="例如：历史问题（第一至七单元）">
+    </div>
+    <div class="form-row">
+      <label>Markdown 内容（题目格式：<code>1. ## 题目</code>，其下全部为答案；单元标题用 <code># 单元名</code>）</label>
+      <textarea id="importMd" placeholder="粘贴 Markdown 内容…"></textarea>
+      <div class="hint">自动兼容编辑器造成的变体格式，如 <code>## 1、题目</code>、<code>### 28、题目</code> 等，均可识别为题目。</div>
+    </div>
+    <div class="modal-actions">
+      <button id="importFileBtn">📂 从文件读取</button>
+      <input type="file" id="importFile" accept=".md,.markdown,.txt" style="display:none">
+      <span style="flex:1"></span>
+      <button onclick="closeMod('importModal')">取消</button>
+      <button class="primary" onclick="doImport()">导入并新建文档</button>
+    </div>
+  </div>
+</div>
+
+<!-- 薄弱点管理弹窗 -->
+<div id="weakModal" class="modal-backdrop">
+  <div class="modal">
+    <h3>⭐ 薄弱点管理</h3>
+    <p class="hint">点击题目上的 ★ 即可把该题加入「当前列表」。列表保存在服务器后端（qa_data.json）；可新建（命名）、设为当前、重命名、删除，也可导出/导入 JSON 以便备份或换设备后恢复。</p>
+    <div class="form-row" style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="newWlName" placeholder="新列表名称，如：第一单元薄弱" style="flex:1">
+      <button class="primary" onclick="createWeakList()">＋ 新建列表</button>
+    </div>
+    <div id="wlList"></div>
+    <div id="wlImportBox" style="display:none;margin-top:8px;">
+      <div class="form-row">
+        <label>粘贴薄弱点 JSON（来自之前的导出）：</label>
+        <textarea id="wlImportTxt" placeholder='{"weakLists":[{"name":"我的薄弱点","qids":["q1","q2"]}]}' style="height:110px;"></textarea>
+      </div>
+      <div class="modal-actions"><button class="primary" onclick="doImportWeakLists()">导入</button></div>
+    </div>
+    <div class="modal-actions">
+      <button onclick="exportWeakLists()">⬇ 导出薄弱点JSON</button>
+      <button onclick="toggleWlImportBox()">⬆ 导入薄弱点JSON</button>
+      <span style="flex:1"></span>
+      <button onclick="closeMod('weakModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 数据管理弹窗 -->
+<div id="dataModal" class="modal-backdrop">
+  <div class="modal">
+    <h3>⚙ 数据管理</h3>
+    <div class="tab">
+      <button class="active" onclick="switchDataTab(this,'export')">导出 JSON</button>
+      <button onclick="switchDataTab(this,'import')">导入 JSON</button>
+      <button onclick="switchDataTab(this,'server')">保存到服务器</button>
+    </div>
+    <div id="exportArea">
+      <p class="hint">导出全部问答数据（所有文档 + 薄弱点列表）为 JSON，用于备份/迁移。</p>
+      <textarea id="exportJson" readonly></textarea>
+      <div class="modal-actions"><button onclick="copyExport()">复制</button><button onclick="downloadJson()">下载 .json</button></div>
+    </div>
+    <div id="importArea" style="display:none">
+      <p class="hint">粘贴 JSON 后将<b>覆盖</b>当前全部问答数据（请先导出备份）。</p>
+      <textarea id="importJson" placeholder="在此粘贴 JSON 数据…"></textarea>
+      <div class="modal-actions"><button class="danger" onclick="importQaJson()">导入并覆盖</button></div>
+    </div>
+    <div id="serverArea" style="display:none">
+      <p class="hint">问答数据（文档 + 薄弱点）修改后自动同步到服务器 <b>qa_data.json</b>，无需手动操作。下方为手动兜底。</p>
+      <div class="modal-actions"><button onclick="saveToServer()">立即保存到服务器</button><button onclick="loadFromServer()">从服务器加载</button></div>
+      <p id="serverMsg" class="hint"></p>
+    </div>
+  </div>
+</div>
+
+<div id="errBox"></div>
+
+<script>
+"use strict";
+/* ════════════ 模式与全局错误捕获 ════════════ */
+window.G_OFFLINE = window.__OFFLINE_DATA !== undefined;
+window.G_READONLY = (location.port === "8424") || window.G_OFFLINE;
+window.addEventListener('error', function (evt) {
+  try {
+    var msg = (evt && (evt.message || (evt.error && evt.error.message))) || '';
+    var ln = (evt && evt.lineno) ? (' @' + evt.lineno) : '';
+    var box = document.getElementById('errBox');
+    if (box) { box.textContent = '页面脚本错误: ' + msg + ln; box.style.display = 'block'; }
+    try { document.title = '页面脚本错误: ' + msg + ln; } catch (_t) {}
+  } catch (_e) {}
+});
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = p => (p || "x") + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const now = () => { const d = new Date(); const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()); };
+
+/* ════════════ 数据 ════════════ */
+let qa = { version: 1, docs: [], weakLists: [] };
+let curDocId = null;        // 当前文档
+let activeListId = null;    // 当前薄弱点列表（null=不选列表，浏览文档）
+let weakScope = "list";     // 选中列表后的显示范围："list"=仅列表内，"all"=全部题目（用于浏览并星标收集）
+let page = 0, pageSize = 30;
+const shown = new Set();    // 已展开答案的 qid
+const mdCache = {};         // qid -> 渲染好的答案 HTML
+
+function normalizeQa(o) {
+  o = o || {};
+  if (!Array.isArray(o.docs)) o.docs = [];
+  if (!Array.isArray(o.weakLists)) o.weakLists = [];
+  o.docs.forEach(d => { if (!Array.isArray(d.units)) d.units = []; d.units.forEach(u => { if (!Array.isArray(u.questions)) u.questions = []; }); });
+  return o;
+}
+
+/* ════════════ Markdown 题目文档解析 ════════════ */
+/* 单元：`# 单元名`（H1）                                     */
+/* 题目：编号 + ##/### + 标题（如 `1. ## 虎门销烟意义`）        */
+/*       也兼容编辑器变体：`## 1、题目`、`### 28、题目` 等      */
+/* 其余行全部属于当前题目的答案                                 */
+function parseMdToUnits(text) {
+  const lines = String(text || "").replace(/\r\n/g, "\n").split("\n");
+  const units = [];
+  let cur = null, q = null;
+  const pushQ = (t) => {
+    if (!cur) { cur = { title: "未分单元", questions: [] }; units.push(cur); }
+    const obj = { id: uid("q"), title: t, lines: [] };
+    cur.questions.push(obj);
+    return obj;
+  };
+  const qRe = /^\s*(?:(\d+)\s*[.、)．]\s*)?(#{2,3})(?!\s*#)\s*(?:(\d+)\s*[.、)．]\s*)?(.+)$/;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;                     // 空行跳过：不产生题目、不进入答案
+    const m1 = line.match(/^#\s+(.+)$/);            // 单元标题（H1）
+    if (m1) { cur = { title: m1[1].trim(), questions: [] }; units.push(cur); q = null; continue; }
+    const mq = line.match(qRe);                      // 题目行
+    if (mq && (mq[1] || mq[3])) { q = pushQ(mq[4].trim()); continue; }
+    if (!q) q = pushQ("（未命名题目）");             // 单元外的散落答案
+    q.lines.push(line);
+  }
+  units.forEach(u => u.questions.forEach(x => { x.answerMd = x.lines.join("\n").trim(); delete x.lines; }));
+  return units;
+}
+
+/* ════════════ 答案 Markdown 渲染（轻量，支持加粗/标题/列表/表格/段落） ════════════ */
+function escHtml(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function mdInline(s) {
+  s = escHtml(s);
+  s = s.replace(/\*\*\*(.+?)\*\*\*/g, "<b><i>$1</i></b>");
+  s = s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<i>$2</i>");
+  return s;
+}
+const isListLine = l => /^\s*(?:[-*•·]\s+|\d+\s*[.、)．]\s+|（\d+）\s+)\S/.test(l);
+const isTableLine = l => /^\s*\|.*\|\s*$/.test(l);
+function mdToHtml(md) {
+  const lines = String(md || "").replace(/\r\n/g, "\n").split("\n");
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const t = line.trim();
+    if (!t) { i++; continue; }
+    // 标题（答案内的小节）
+    let m = t.match(/^(#{1,6})\s+(.+)$/);
+    if (m) { out.push('<div class="ans-h h' + Math.min(6, m[1].length) + '">' + mdInline(m[2].trim()) + '</div>'); i++; continue; }
+    // 表格
+    if (isTableLine(line)) {
+      const rows = [];
+      while (i < lines.length && isTableLine(lines[i])) { rows.push(lines[i].trim()); i++; }
+      const parseRow = r => r.replace(/^\|/, "").replace(/\|$/, "").split("|").map(c => c.trim());
+      let header = null, body = [];
+      if (rows.length >= 2 && /^\|[\s:|-]+\|$/.test(rows[1]) && rows[1].includes("-")) {
+        header = parseRow(rows[0]); body = rows.slice(2).map(parseRow);
+      } else { body = rows.map(parseRow); }
+      let h = '<div class="ans-table"><table>';
+      if (header) h += '<tr>' + header.map(c => '<th>' + mdInline(c) + '</th>').join("") + '</tr>';
+      body.forEach(r => { h += '<tr>' + r.map(c => '<td>' + mdInline(c) + '</td>').join("") + '</tr>'; });
+      h += '</table></div>';
+      out.push(h);
+      continue;
+    }
+    // 列表（保留原文编号，避免跨空行编号错乱）
+    if (isListLine(line)) {
+      let block = '<div class="ans-list">';
+      while (i < lines.length && lines[i].trim() && isListLine(lines[i])) {
+        const li = lines[i].trim();
+        const mm = li.match(/^(?:([-*•·])\s+|(\d+)\s*[.、)．]\s*|（(\d+)）\s*)(.*)$/);
+        const marker = mm ? (mm[1] || mm[2] || ("（" + mm[3] + "）")) : "•";
+        block += '<div class="ans-li"><span class="ans-li-no">' + marker + '</span>' + mdInline(mm ? mm[4] : li) + '</div>';
+        i++;
+      }
+      out.push(block + '</div>');
+      continue;
+    }
+    // 段落
+    let para = [];
+    while (i < lines.length && lines[i].trim() && !isListLine(lines[i]) && !isTableLine(lines[i]) && !/^#{1,6}\s+/.test(lines[i].trim())) { para.push(lines[i].trim()); i++; }
+    out.push('<div class="ans-p">' + para.map(mdInline).join("<br>") + '</div>');
+  }
+  return out.join("");
+}
+function getMdHtml(q) { if (!mdCache[q.id]) mdCache[q.id] = mdToHtml(q.answerMd); return mdCache[q.id]; }
+
+/* ════════════ 当前视图（文档浏览 或 薄弱点列表） ════════════ */
+function flatDoc(doc) {
+  const out = [];
+  (doc.units || []).forEach(u => (u.questions || []).forEach(q => out.push({ q, qid: q.id, unit: u.title, doc })));
+  return out;
+}
+function currentView() {
+  const list = activeListId ? qa.weakLists.find(w => w.id === activeListId) : null;
+  if (list && weakScope === "list") {
+    // 仅列表内：跨文档收集该列表标记的题目
+    const set = new Set(list.qids || []);
+    const items = [];
+    qa.docs.forEach(d => flatDoc(d).forEach(it => { if (set.has(it.qid)) items.push(it); }));
+    return { label: list.name, items };
+  }
+  // 全部题目（未选列表，或选中列表但范围选“全部题目”）→ 查看当前文档全部题目，可星标收集
+  const doc = qa.docs.find(d => d.id === curDocId) || qa.docs[0] || null;
+  return { label: doc ? doc.name : "", items: doc ? flatDoc(doc) : [] };
+}
+
+/* ════════════ 渲染 ════════════ */
+function renderTabs() {
+  const box = $("docTabs"); box.innerHTML = "";
+  qa.docs.forEach(d => {
+    const t = document.createElement("div");
+    t.className = "doc-tab" + (d.id === curDocId ? " active" : "");
+    t.innerHTML = '<span class="dt-name" title="' + esc(d.name) + '">' + esc(d.name) + '</span>' +
+      (d.id === curDocId ? '<span class="dt-x act-ren" title="重命名">✎</span>' : '') +
+      '<span class="dt-x act-del" title="删除文档">✕</span>';
+    t.querySelector(".dt-name").onclick = e => { e.stopPropagation(); switchDoc(d.id); };
+    t.querySelector(".act-del").onclick = e => { e.stopPropagation(); deleteDoc(d.id); };
+    const ren = t.querySelector(".act-ren");
+    if (ren) ren.onclick = e => { e.stopPropagation(); renameDoc(d.id); };
+    box.appendChild(t);
+  });
+  const add = document.createElement("div");
+  add.className = "doc-tab doc-tab-add"; add.textContent = "＋ 导入文档";
+  add.onclick = () => openImport();
+  box.appendChild(add);
+}
+function switchDoc(id) { curDocId = id; activeListId = null; page = 0; shown.clear(); renderAll(); }
+function renameDoc(id) {
+  const d = qa.docs.find(x => x.id === id); if (!d) return;
+  const n = prompt("重命名文档《" + d.name + "》：", d.name);
+  if (n && n.trim()) { d.name = n.trim(); saveQa(); renderTabs(); renderList(); }
+}
+function deleteDoc(id) {
+  const d = qa.docs.find(x => x.id === id); if (!d) return;
+  if (!confirm("删除文档《" + d.name + "》？其全部题目将一并删除。")) return;
+  const gone = new Set();
+  d.units.forEach(u => u.questions.forEach(q => gone.add(q.id)));
+  qa.docs = qa.docs.filter(x => x.id !== id);
+  qa.weakLists.forEach(w => { w.qids = (w.qids || []).filter(q => !gone.has(q)); });
+  if (curDocId === id) curDocId = qa.docs[0] ? qa.docs[0].id : null;
+  page = 0; shown.clear(); saveQa(); renderAll();
+}
+
+function renderWeakSel() {
+  const sel = $("weakSel");
+  sel.innerHTML = '<option value="">全部题目</option>';
+  qa.weakLists.forEach(w => {
+    const o = document.createElement("option");
+    o.value = w.id;
+    o.textContent = "⭐ " + w.name + "（" + (w.qids || []).length + "题）";
+    if (w.id === activeListId) o.selected = true;
+    sel.appendChild(o);
+  });
+  if (!activeListId) sel.value = "";
+  renderScopeSel();
+}
+function renderScopeSel() {
+  const sc = $("weakScopeSel");
+  if (!sc) return;
+  if (!activeListId) {
+    // 未选列表：无需范围，隐藏下拉
+    sc.style.display = "none";
+    weakScope = "all";
+    sc.value = "all";
+  } else {
+    sc.style.display = "";
+    sc.innerHTML = '<option value="list">仅列表内</option><option value="all">全部题目</option>';
+    sc.value = weakScope;
+  }
+}
+$("weakSel").onchange = e => {
+  activeListId = e.target.value || null;
+  weakScope = activeListId ? "list" : "all"; // 新选中列表默认只看列表内，也可切到全部题目
+  page = 0; shown.clear(); renderList();
+};
+$("weakScopeSel").onchange = e => { weakScope = e.target.value === "all" ? "all" : "list"; page = 0; shown.clear(); renderList(); };
+
+function renderList() {
+  const view = currentView();
+  const items = view.items;
+  const total = items.length;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  if (page > pages - 1) page = pages - 1;
+  const slice = items.slice(page * pageSize, (page + 1) * pageSize);
+  const box = $("qaList"); box.innerHTML = "";
+  const list = activeListId ? qa.weakLists.find(w => w.id === activeListId) : null;
+  const inList = qid => list && (list.qids || []).includes(qid);
+  let lastUnit = null;
+  slice.forEach((it, idx) => {
+    const abs = page * pageSize + idx;
+    if (it.unit !== lastUnit) {
+      const uh = document.createElement("div"); uh.className = "unit-head"; uh.textContent = it.unit;
+      box.appendChild(uh); lastUnit = it.unit;
+    }
+    const card = document.createElement("div"); card.className = "qa-card";
+    card.innerHTML =
+      '<div class="qa-head">' +
+        '<span class="qa-num">' + (abs + 1) + '</span>' +
+        (list && weakScope === "list" ? '<span class="qa-doc-badge" title="' + esc(it.doc.name) + '">' + esc(it.doc.name) + '</span>' : '') +
+        '<div class="qa-title">' + esc(it.q.title) + '</div>' +
+        '<button class="star-btn' + (inList(it.qid) ? " on" : "") + '" title="标记/取消薄弱点（加入当前列表）">' + (inList(it.qid) ? "★" : "☆") + '</button>' +
+      '</div>' +
+      '<div class="qa-ans' + (shown.has(it.qid) ? " show" : "") + '"><div class="qa-ans-md"></div></div>' +
+      '<div class="qa-foot"><button class="toggle-ans' + (shown.has(it.qid) ? " showing" : "") + '">' + (shown.has(it.qid) ? "隐藏答案" : "显示答案") + '</button></div>';
+    card.querySelector(".star-btn").onclick = () => toggleStar(it.qid);
+    const ansDiv = card.querySelector(".qa-ans");
+    const mdDiv = ansDiv.querySelector(".qa-ans-md");
+    if (shown.has(it.qid)) mdDiv.innerHTML = getMdHtml(it.q); // 批量显示后重渲染：同步填充答案文字
+    const toggle = card.querySelector(".toggle-ans");
+    const setAns = show => {
+      if (show && !mdDiv.innerHTML) mdDiv.innerHTML = getMdHtml(it.q);
+      ansDiv.classList.toggle("show", show);
+      toggle.classList.toggle("showing", show);
+      toggle.textContent = show ? "隐藏答案" : "显示答案";
+      if (show) shown.add(it.qid); else shown.delete(it.qid);
+    };
+    toggle.onclick = () => setAns(!ansDiv.classList.contains("show"));
+    box.appendChild(card);
+  });
+  if (!slice.length) {
+    box.innerHTML = '<div class="empty-tip">暂无题目。<br>点上方「＋ 导入文档」导入 Markdown 题库（题目格式：<code>1. ## 题目</code>）。</div>';
+  }
+  renderPager(total, pages);
+}
+function renderPager(total, pages) {
+  const box = $("pager");
+  box.innerHTML =
+    '<button id="pgPrev">← 上一页</button>' +
+    '<span class="pg-info">第 ' + (page + 1) + ' / ' + pages + ' 页 · 共 ' + total + ' 题</span>' +
+    '<button id="pgNext">下一页 →</button>' +
+    '<select id="pgSize" title="每页条数（最多30条，移动端更稳）"><option>10</option><option>20</option><option selected>30</option></select>';
+  $("pgPrev").disabled = page <= 0;
+  $("pgNext").disabled = page >= pages - 1;
+  $("pgPrev").onclick = () => { if (page > 0) { page--; window.scrollTo({ top: 0 }); renderList(); } };
+  $("pgNext").onclick = () => { if (page < pages - 1) { page++; window.scrollTo({ top: 0 }); renderList(); } };
+  $("pgSize").value = pageSize;
+  $("pgSize").onchange = e => { pageSize = +e.target.value; page = 0; renderList(); };
+}
+
+/* ════════════ 批量显隐答案 ════════════ */
+$("showAllBtn").onclick = () => { currentView().items.forEach(it => shown.add(it.qid)); renderList(); };
+$("hideAllBtn").onclick = () => { shown.clear(); renderList(); };
+
+/* ════════════ 薄弱点 ════════════ */
+function toggleStar(qid) {
+  if (window.G_READONLY) { alert("当前为只读端口，不能修改薄弱点。"); return; }
+  let list = activeListId ? qa.weakLists.find(w => w.id === activeListId) : null;
+  if (!list) {
+    if (!qa.weakLists.length) {
+      list = { id: uid("wl"), name: "我的薄弱点", qids: [], created: now() };
+      qa.weakLists.push(list);
+    } else {
+      alert("请先在「⭐ 薄弱点」中选择一个列表作为当前列表，再点星标。");
+      return;
+    }
+    activeListId = list.id;
+  }
+  const i = list.qids.indexOf(qid);
+  if (i >= 0) list.qids.splice(i, 1); else list.qids.push(qid);
+  saveQa(); renderWeakSel(); renderList();
+}
+function renderWeakPanel() {
+  const box = $("wlList"); box.innerHTML = "";
+  if (!qa.weakLists.length) {
+    box.innerHTML = '<p class="hint" style="padding:8px;">还没有薄弱点列表。新建一个列表后，点击题目上的 ★ 即可收集薄弱题，或通过「导入薄弱点JSON」恢复之前的记录。</p>';
+    return;
+  }
+  qa.weakLists.forEach(w => {
+    const row = document.createElement("div"); row.className = "wl-row";
+    row.innerHTML = '<span class="wl-name" title="' + esc(w.name) + '">' + esc(w.name) + '</span><span class="wl-count">' + (w.qids || []).length + ' 题</span>';
+    const cur = document.createElement("button");
+    if (activeListId === w.id) { cur.className = "wl-cur"; cur.textContent = "✓ 当前"; cur.disabled = true; }
+    else {
+      cur.textContent = "设为当前";
+      cur.onclick = () => { activeListId = w.id; renderWeakPanel(); renderWeakSel(); renderList(); };
+    }
+    const ren = document.createElement("button"); ren.textContent = "重命名";
+    ren.onclick = () => { const n = prompt("重命名列表《" + w.name + "》：", w.name); if (n && n.trim()) { w.name = n.trim(); saveQa(); renderWeakPanel(); renderWeakSel(); } };
+    const exp = document.createElement("button"); exp.textContent = "导出";
+    exp.onclick = () => exportOneList(w);
+    const del = document.createElement("button"); del.className = "wl-del"; del.textContent = "删除";
+    del.onclick = () => {
+      if (!confirm("删除列表《" + w.name + "》？")) return;
+      qa.weakLists = qa.weakLists.filter(x => x.id !== w.id);
+      if (activeListId === w.id) activeListId = null;
+      saveQa(); renderWeakPanel(); renderWeakSel(); renderList();
+    };
+    row.appendChild(cur); row.appendChild(exp); row.appendChild(ren); row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+function createWeakList() {
+  if (window.G_READONLY) { alert("当前为只读端口，不能新建列表。"); return; }
+  const n = String($("newWlName").value).trim();
+  if (!n) { alert("请输入列表名称。"); return; }
+  qa.weakLists.push({ id: uid("wl"), name: n, qids: [], created: now() });
+  $("newWlName").value = "";
+  activeListId = qa.weakLists[qa.weakLists.length - 1].id;
+  saveQa(); renderWeakPanel(); renderWeakSel(); renderList();
+}
+function exportOneList(w) {
+  downloadText(JSON.stringify({ weakLists: [w] }, null, 2), (w.name || "薄弱点") + ".json");
+}
+function exportWeakLists() {
+  downloadText(JSON.stringify({ version: 1, weakLists: qa.weakLists }, null, 2), "薄弱点列表.json");
+}
+function toggleWlImportBox() { $("wlImportBox").style.display = $("wlImportBox").style.display === "none" ? "block" : "none"; }
+function doImportWeakLists() {
+  const txt = String($("wlImportTxt").value).trim();
+  if (!txt) { alert("请先粘贴薄弱点 JSON。"); return; }
+  try {
+    const o = JSON.parse(txt);
+    const lists = (Array.isArray(o) ? o : (o.weakLists || [o])).filter(l => l && l.name);
+    if (!lists.length) { alert("JSON 中没有找到薄弱点列表。"); return; }
+    let n = 0;
+    lists.forEach(l => {
+      const hit = qa.weakLists.find(w => w.name === l.name);
+      if (hit) { (l.qids || []).forEach(q => { if (!hit.qids.includes(q)) hit.qids.push(q); }); }
+      else { qa.weakLists.push({ id: uid("wl"), name: l.name, qids: l.qids || [], created: now() }); }
+      n++;
+    });
+    $("wlImportTxt").value = ""; $("wlImportBox").style.display = "none";
+    saveQa(); renderWeakPanel(); renderWeakSel(); renderList();
+    alert("导入完成：新增/合并 " + n + " 个列表。");
+  } catch (e) { alert("JSON 解析失败：" + e.message); }
+}
+
+/* ════════════ 导入 md ════════════ */
+function openImport() {
+  if (window.G_READONLY) { alert("当前为只读端口，不能导入。"); return; }
+  $("importName").value = ""; $("importMd").value = "";
+  $("importModal").classList.add("open");
+}
+$("importFileBtn").onclick = () => $("importFile").click();
+$("importFile").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { $("importMd").value = r.result; };
+  r.readAsText(f, "utf-8");
+  e.target.value = "";
+};
+function doImport() {
+  const md = String($("importMd").value);
+  if (!md.trim()) { alert("请粘贴 Markdown 内容或从文件读取。"); return; }
+  const units = parseMdToUnits(md);
+  const totalQ = units.reduce((n, u) => n + u.questions.length, 0);
+  if (!totalQ) { alert("未识别到任何题目。请确认格式：题目形如「1. ## 题目」，单元用「# 单元名」。"); return; }
+  const m1 = md.match(/^#\s+[^\n]+/m);
+  const name = String($("importName").value).trim() || (m1 ? m1[0].replace(/^#\s+/, "").trim() : "") || ("文档" + (qa.docs.length + 1));
+  const doc = { id: uid("doc"), name, created: now(), units };
+  qa.docs.push(doc);
+  curDocId = doc.id; activeListId = null; page = 0; shown.clear();
+  saveQa(); closeMod("importModal"); renderAll();
+  alert("导入成功：共 " + totalQ + " 道题 / " + units.length + " 个单元。");
+}
+
+/* ════════════ 数据管理 ════════════ */
+function switchDataTab(btn, name) {
+  document.querySelectorAll("#dataModal .tab button").forEach(b => b.classList.toggle("active", b === btn));
+  ["export", "import", "server"].forEach(n => $(n + "Area").style.display = (n === name ? "block" : "none"));
+}
+function copyExport() { $("exportJson").select(); document.execCommand("copy"); alert("已复制到剪贴板"); }
+function downloadJson() { downloadText($("exportJson").value, "问答数据.json"); }
+function downloadText(content, filename) {
+  const blob = new Blob([content], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = filename; a.click();
+}
+function importQaJson() {
+  const txt = String($("importJson").value).trim();
+  if (!txt) { alert("导入框是空的：请先把 JSON 全文粘贴到上方文本框。"); return; }
+  let o; try { o = JSON.parse(txt); } catch (err) { alert("JSON 解析失败：" + err.message); return; }
+  if (!o || !Array.isArray(o.docs)) { alert("缺少 docs 数组，格式不正确。"); return; }
+  qa = normalizeQa(o);
+  curDocId = qa.docs[0] ? qa.docs[0].id : null; activeListId = null; page = 0; shown.clear();
+  saveQa(); closeMod("dataModal"); renderAll(); alert("导入成功！");
+}
+async function saveToServer() {
+  try {
+    const r = await fetch("/api/qa/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(qa) });
+    const j = await r.json();
+    $("serverMsg").textContent = j.ok ? "已保存到服务器 qa_data.json ✔" : ("失败：" + (j.error || ""));
+  } catch (e) { $("serverMsg").textContent = "连接失败，请确认已通过 server.py 启动。"; }
+}
+async function loadFromServer() {
+  try {
+    const r = await fetch("/api/qa/load");
+    const j = await r.json();
+    if (j && j.ok && j.data) {
+      qa = normalizeQa(j.data);
+      curDocId = qa.docs[0] ? qa.docs[0].id : null; activeListId = null; page = 0; shown.clear();
+      renderAll();
+      $("serverMsg").textContent = "已从服务器加载 ✔";
+    } else { $("serverMsg").textContent = "服务器上暂无有效数据。"; }
+  } catch (e) { $("serverMsg").textContent = "连接失败，请确认已通过 server.py 启动。"; }
+}
+
+/* ════════════ 持久化（服务器 qa_data.json，不碰 localStorage） ════════════ */
+let syncTimer = null;
+function saveQa() {
+  if (window.G_READONLY) {
+    const h = $("qaHint");
+    if (h) h.textContent = window.G_OFFLINE ? "离线副本 · 仅供查看" : "只读模式 · 可导出";
+    return;
+  }
+  const h = $("qaHint"); h.textContent = "已保存到服务器";
+  clearTimeout(saveQa._t);
+  saveQa._t = setTimeout(() => { if (h) h.textContent = "已保存到服务器 · qa_data.json"; }, 900);
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    try {
+      fetch("/api/qa/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(qa) })
+        .then(r => r.json()).then(j => { if (!j.ok) console.warn("自动同步失败", j && j.error); })
+        .catch(e => console.warn("自动同步失败：未连接到服务端？", e));
+    } catch (e) { console.warn(e); }
+  }, 450);
+}
+
+/* ════════════ 只读模式 ════════════ */
+function applyReadonlyUI() {
+  if (!window.G_READONLY) return;
+  $("importBtn").style.display = "none";
+  $("weakBtn").style.display = "none";
+  document.querySelectorAll("#dataModal .tab button").forEach(b => {
+    const o = b.getAttribute("onclick") || "";
+    if (o.includes("import") || o.includes("server")) b.style.display = "none";
+  });
+  document.querySelectorAll("#importArea,#serverArea").forEach(a => a.style.display = "none");
+}
+
+/* ════════════ 保存离线网页 ════════════ */
+function wireOffline() {
+  const b = $("offlineBtn"); if (!b) return;
+  b.onclick = async () => {
+    if (window.G_OFFLINE) { alert("当前已是离线副本，直接保存/使用本文件即可，无需再次导出。"); return; }
+    const total = qa.docs.reduce((n, d) => n + d.units.reduce((m, u) => m + u.questions.length, 0), 0);
+    if (!total) { alert("当前还没有任何题目，导出的离线网页会是空的。请先导入题目。"); return; }
+    let src;
+    try { src = await fetch(location.href).then(r => r.text()); }
+    catch (e) { alert("读取页面源码失败，无法导出离线网页。"); return; }
+    const safe = JSON.stringify(qa).replace(/</g, "\\u003c");
+    const inject = '<script>window.__OFFLINE_DATA=' + safe + '<\/' + 'script>';
+    const out = (src.indexOf("</head>") > -1) ? src.replace("</head>", inject + "</head>") : src.replace(/<script>/i, inject + "<script>");
+    const blob = new Blob([out], { type: "text/html" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = "问答练习.offline.html"; a.click();
+    alert("已开始下载离线网页（含 " + qa.docs.length + " 个文档 / " + total + " 道题）。双击该 .offline.html 即可离线查看全部内容。");
+  };
+}
+
+/* ════════════ 弹窗工具 ════════════ */
+function closeMod(id) { $(id).classList.remove("open"); }
+document.querySelectorAll(".modal-backdrop").forEach(m => m.addEventListener("click", e => { if (e.target === m) closeMod(m.id); }));
+$("dataBtn").onclick = () => {
+  $("exportJson").value = JSON.stringify(qa, null, 2);
+  $("dataModal").classList.add("open");
+  switchDataTab(document.querySelector("#dataModal .tab button"), "export");
+};
+$("weakBtn").onclick = () => { if (window.G_READONLY) { alert("当前为只读端口，不能管理薄弱点。"); return; } renderWeakPanel(); $("weakModal").classList.add("open"); };
+
+/* ════════════ 主题（全局统一：主题存于服务器 ui_config.json，与时间轴/主页共享） ════════════ */
+const THEME_ALT={"parchment":"theme-parchment","ocean":"theme-ocean","forest":"theme-forest","mono":"theme-mono"};
+let G_THEME="parchment";
+function applyThemeUI(){
+  document.body.className=THEME_ALT[G_THEME]||"theme-parchment";
+  const box=$("thBox"); if(box) document.querySelectorAll("#thBox .th-item").forEach(t=>t.classList.toggle("active",t.dataset.t===G_THEME));
+}
+function pickTheme(t){
+  if(!THEME_ALT[t]) t="parchment";
+  G_THEME=t; applyThemeUI();
+  if(window.G_READONLY){ return; } // 只读/离线：仅本页临时生效
+  try{ fetch("/api/ui/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({version:1,theme:t})}).catch(()=>{}); }catch(e){}
+  const h=$("qaHint"); if(h){ h.textContent="配色已保存到服务器"; clearTimeout(globalThis._thHintTimer); globalThis._thHintTimer=setTimeout(()=>{ if(h) h.textContent=""; },1200); }
+}
+function loadGlobalTheme(){
+  if(window.G_OFFLINE)return;
+  fetch("/api/ui/load").then(r=>r.json()).then(j=>{
+    if(j&&j.ok&&j.data&&THEME_ALT[j.data.theme]){ G_THEME=j.data.theme; applyThemeUI(); }
+  }).catch(()=>{});
+}
+if($("thBtn")){
+  $("thBtn").onclick=(e)=>{ e.stopPropagation(); $("thBox").classList.toggle("open"); };
+  document.addEventListener("click",e=>{ if($("thBox")&&!$("thBox").contains(e.target)&&e.target!==$("thBtn"))$("thBox").classList.remove("open"); });
+}
+
+/* ════════════ 启动 ════════════ */
+function renderAll() { renderTabs(); renderWeakSel(); renderList(); }
+function boot() {
+  if (window.G_OFFLINE) {
+    try { qa = normalizeQa(window.__OFFLINE_DATA); } catch (e) {}
+  } else {
+    qa = normalizeQa({ version: 1, docs: [], weakLists: [] });
+  }
+  applyReadonlyUI();
+  renderAll();
+  if (!window.G_OFFLINE) {
+    fetch("/api/qa/load").then(r => r.json()).then(j => {
+      if (j && j.ok && j.data) { qa = normalizeQa(j.data); curDocId = qa.docs[0] ? qa.docs[0].id : null; renderAll(); }
+    }).catch(() => {});
+    loadGlobalTheme();
+  }
+  wireOffline();
+}
+boot();
+</script>
+</body>
+</html>
